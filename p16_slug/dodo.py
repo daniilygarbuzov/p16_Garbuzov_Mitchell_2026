@@ -125,6 +125,14 @@ def task_config():
         "clean": [],
     }
 
+def task_pull_CFTC():
+    """Pull data from CFTC website"""
+    
+def task_pull_CRB():
+    """Pull data from CRB website"""
+
+def task_pull_FRED():
+    """Pull data from FRED website"""
 
 def task_pull():
     """Pull data from external sources"""
