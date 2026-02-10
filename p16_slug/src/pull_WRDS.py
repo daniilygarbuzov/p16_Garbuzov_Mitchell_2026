@@ -16,6 +16,29 @@ import chartbook
 DATA_DIR = config("DATA_DIR")
 WRDS_USERNAME = config("WRDS_USERNAME")
 
+TR_DS_COMDS_SERIES = {
+    "heating_oil": 7796,
+    "gas": 1609,
+    "crude_oil": 15909,
+    "feeder_cattle": 11646,
+    "live_cattle": 10829,
+    "live_hogs": 11292,
+    "gold": 11288,
+    "copper": 4155,
+    "silver": 7193,
+    "corn": 8629,
+    "oats": 7113,
+    "wheat": 13100,
+    "rough_rice": 14985,
+    "soybean_oil": 10731,
+    "soybeans": 13060,
+    "soybean_meal": 6718,
+    "coffee": 10806,
+    "orange_juice": 2519,
+    "cocoa": 684,
+    "cotton": 792,
+    "lumber": 16751,
+}
 
 def fetch_wrds_contract_info(product_contract_code):
     """
@@ -134,9 +157,72 @@ def pull_wrds_tables(data_dir=DATA_DIR):
 
     db.close()
 
+#SPOT SERIES STUFF
+
+def pull_all_spot_series(data_dir=DATA_DIR):
+    """
+    Pull continuous/spot commodity series from TR_DS_COMDS (wrds_cmdy_data)
+    and save to parquet.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Columns: date, price, comcode, series_name, plus any extra metadata.
+    """
+    db = wrds.Connection(wrds_username=WRDS_USERNAME)
+
+    # Inspect wrds_cmdy_data once to confirm these names:
+    #   - comcode: series code
+    #   - date_: date
+    #   - value: price/series value
+    table_name = "wrds_cmdy_data"
+    comcode_col = "comcode"
+    date_col = "date_"
+    value_col = "close_"
+
+    comcodes = tuple(TR_DS_COMDS_SERIES.values())
+
+    query = f"""
+    SELECT {comcode_col} AS comcode,
+           {date_col} AS date_,
+           {value_col} AS value
+    FROM tr_ds_comds.{table_name}
+    WHERE {comcode_col} IN {comcodes}
+    """
+
+    df = db.raw_sql(query)
+
+    # Optional: join some description from wrds_cmdy_info
+    info = db.get_table(library="tr_ds_comds", table="wrds_cmdy_info")
+    db.close()
+
+    # Map info by comcode so we can add a readable name
+    info_small = info[[ "comcode", "dsmnemonic", "name", "comdesc" ]].drop_duplicates()
+    df = df.merge(info_small, on="comcode", how="left")
+
+    df["date"] = pd.to_datetime(df["date_"])
+    df = df.drop(columns=["date_"])
+
+    # Add our own series_name column (short, consistent label)
+    inv_map = {v: k for k, v in TR_DS_COMDS_SERIES.items()}
+    df["series_name"] = df["comcode"].map(inv_map)
+
+    data_dir = Path(data_dir)
+    path = data_dir / "wrds_spot.parquet"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    df.to_parquet(path)
+
+    return df
+
 
 if __name__ == "__main__":
     df = pull_all_futures_data()
     path = DATA_DIR / "wrds_futures.parquet"
     path.parent.mkdir(parents=True, exist_ok=True)
     df.to_parquet(path)
+
+    # Spot / continuous series (TR_DS_COMDS)
+    df_spot = pull_all_spot_series()
+    spot_path = DATA_DIR / "wrds_spot.parquet"
+    spot_path.parent.mkdir(parents=True, exist_ok=True)
+    df_spot.to_parquet(spot_path)
