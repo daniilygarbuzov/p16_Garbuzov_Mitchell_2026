@@ -28,7 +28,7 @@ try:
     ax.grid(True, alpha=0.3)
     fig.tight_layout()
 
-#   Convert to Plotly and save HTML
+    # Convert to Plotly and save HTML
     plotly_fig = tls.mpl_to_plotly(fig)
     plotly_fig.write_html(Path(OUTPUT_DIR) / "treasury_yields.html")
     plt.close(fig)
@@ -36,27 +36,46 @@ try:
 except FileNotFoundError:
     print("Skipping treasury yields chart — fred.parquet not found. Run pull_FRED first.")
 
-# --- Futures Settlements ---
+# --- Futures Settlements (Compressed) ---
 try:
     df_futures = load_combined_futures_data()
-    fig, ax = plt.subplots(figsize=(12, 6))
-    for code, group in df_futures.groupby("product_code"):
-        ax.plot(group["date"], group["settlement"], alpha=0.5, label=f"Product {code}")
-    ax.set_title("Futures Settlement Prices")
-    ax.set_xlabel("Date")
-    ax.set_ylabel("Settlement Price")
-    ax.grid(True, alpha=0.3)
-    if df_futures["product_code"].nunique() <= 10:
-        ax.legend()
-    fig.tight_layout()
     
-    # Convert to Plotly and save HTML
-    plotly_fig = tls.mpl_to_plotly(fig)
-    plotly_fig.write_html(Path(OUTPUT_DIR) / "futures_settlements.html")
-    plt.close(fig)
-    fig.savefig(Path(OUTPUT_DIR) / "futures_settlements.png", dpi=150)
-    plt.close(fig)
-    print("Futures settlements chart saved.")
+    # Downsample to every 5th trading day to reduce data points
+    df_futures = df_futures.iloc[::5, :].reset_index(drop=True)
+    
+    # Limit to top 10 commodities by trading volume
+    top_commodities = df_futures.groupby("product_code").size().nlargest(10).index
+    df_futures = df_futures[df_futures["product_code"].isin(top_commodities)]
+    
+    # Use Plotly directly (faster, smaller output than matplotlib conversion)
+    fig = go.Figure()
+    for code in df_futures["product_code"].unique():
+        group = df_futures[df_futures["product_code"] == code]
+        fig.add_trace(go.Scattergl(
+            x=group["date"],
+            y=group["settlement"],
+            mode='lines',
+            name=f"Product {code}",
+            hoverinfo='skip'  # Remove hover data to reduce size
+        ))
+    
+    fig.update_layout(
+        title="Futures Settlement Prices",
+        xaxis_title="Date",
+        yaxis_title="Settlement Price",
+        hovermode=False,  # Disable hover to save space
+        template="plotly_white"
+    )
+    
+    # Save HTML with compression
+    fig.write_html(
+        Path(OUTPUT_DIR) / "futures_settlements.html",
+        config={"responsive": True}
+    )
+    
+    # Save PNG separately
+    fig.write_image(Path(OUTPUT_DIR) / "futures_settlements.png", width=1200, height=600)
+    print("Futures settlements chart saved (compressed).")
 except FileNotFoundError:
     print("Skipping futures chart — wrds_futures.parquet not found. Run pull_WRDS first.")
 
