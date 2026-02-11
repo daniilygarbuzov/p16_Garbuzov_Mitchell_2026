@@ -1,0 +1,87 @@
+[config]
+type = "pipeline"
+chartbook_format_version = "0.0.2"
+
+[pipeline]
+id = "TR"  # ADD THIS WHOLE TABLE
+pipeline_name = "Commodities Paper Replication"
+pipeline_description = "A data science project"
+lead_pipeline_developer = "Garbuzov & Mitchell"
+contributors = ["Garbuzov & Mitchell"]
+software_modules_command = "module load anaconda3/3.11.4 TeXLive/2023"
+runs_on_grid_or_windows_or_other = "Windows/Linux/MacOS"
+git_repo_URL = "p16_Garbuzov_Mitchell_2026"
+README_file_path = "./README.md"
+
+[site]
+title = "Commodities Paper Replication"
+author = "Garbuzov & Mitchell"
+copyright = "2025"
+logo_path = ""
+favicon_path = ""
+
+[notebooks]
+# empty is fine for now
+
+[dataframes.fred_parquet]
+type = "parquet"
+data_sources = """
+Interest Rates:
+"DGS1MO": "1-Month Treasury Yield",
+"DGS3MO": "3-Month Treasury Yield",
+"DGS6MO": "6-Month Treasury Yield",
+"DGS1": "1-Year Treasury Yield",
+"DGS2": "2-Year Treasury Yield",
+"DGS3": "3-Year Treasury Yield"
+"""
+
+data_providers = "FRED (Federal Reserve Bank of St. Louis)"
+dataframe_docs_path = "./metadata_vals/fred_data.md"
+how_is_pulled = "API Call: df = web.DataReader(list(series_to_pull.keys()), \"fred\", start_date, end_date)"
+path_to_parquet_data = "./p16_slug/_data/fred.parquet"
+
+[charts.fred_parquet]
+chart_name = "Interest rates over time"
+short_description_chart = "Plotting US interest rates over time from 1986 to 2010"
+chart_docs_path = "./metadata_vals/fred_graph.md"
+dataframe_id = "fred_parquet"
+path_to_output_chart = "./p16_slug/_output/treasury_yields.png"
+
+[dataframes.wrds_futures_parquet]
+type = "parquet"
+data_sources = """
+TR_DS_COMDS_SERIES:
+"heating_oil": 7796,
+"gas": 1609,
+"crude_oil": 15909,
+"feeder_cattle": 11646,
+"live_cattle": 10829,
+"live_hogs": 11292,
+"gold": 11288,
+"copper": 4155,
+"silver": 7193,
+"corn": 8629,
+"oats": 7113,
+"wheat": 13100,
+"rough_rice": 14985,
+"soybean_oil": 10731,
+"soybeans": 13060,
+"soybean_meal": 6718,
+"coffee": 10806,
+"orange_juice": 2519,
+"cocoa": 684,
+"cotton": 792,
+"lumber": 16751
+"""
+
+data_providers = "LSEG (London Stock Exchange Group) through WRDS"
+dataframe_docs_path = "./metadata_vals/wrds_futures_data.md"
+how_is_pulled = "API Call: df = db.raw_sql(query)"
+path_to_parquet_data = "./p16_slug/_data/wrds_futures.parquet"
+
+[charts.wrds_futures_parquet]
+chart_name = "Futures settlements over time"
+short_description_chart = "Aggregation of futures settlements over time for various commodities"
+chart_docs_path = "./metadata_vals/wrds_futures_graph.md"
+dataframe_id = "wrds_futures_parquet"
+path_to_output_chart = "./p16_slug/_output/futures_settlements.png"

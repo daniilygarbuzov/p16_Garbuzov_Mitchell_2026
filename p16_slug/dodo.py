@@ -155,31 +155,6 @@ def task_pull_WRDS():
         "clean": [],
     }
 
-def task_pull():
-    """Pull data from external sources"""
-    yield {
-        "name": "crsp_stock",
-        "doc": "Pull CRSP stock data from WRDS",
-        "actions": [
-            "ipython ./src/settings.py",
-            "ipython ./src/pull_CRSP_stock.py",
-        ],
-        "targets": [DATA_DIR / "CRSP_stock.parquet"],
-        "file_dep": ["./src/settings.py", "./src/pull_CRSP_stock.py"],
-        "clean": [],
-    }
-    yield {
-        "name": "crsp_compustat",
-        "doc": "Pull CRSP Compustat data from WRDS",
-        "actions": [
-            "ipython ./src/settings.py",
-            "ipython ./src/pull_CRSP_Compustat.py",
-        ],
-        "targets": [DATA_DIR / "CRSP_Compustat.parquet"],
-        "file_dep": ["./src/settings.py", "./src/pull_CRSP_compustat.py"],
-        "clean": [],
-    }
-
 
 def task_exploratory_charts():
     """Generate exploratory charts"""
@@ -199,26 +174,6 @@ def task_exploratory_charts():
     }
 
 
-def task_summary_stats():
-    """Generate summary statistics tables"""
-    file_dep = ["./src/example_table.py"]
-    file_output = [
-        "example_table.tex",
-        "pandas_to_latex_simple_table1.tex",
-    ]
-    targets = [OUTPUT_DIR / file for file in file_output]
-
-    return {
-        "actions": [
-            "ipython ./src/example_table.py",
-            "ipython ./src/pandas_to_latex_demo.py",
-        ],
-        "targets": targets,
-        "file_dep": file_dep,
-        "clean": True,
-    }
-
-
 notebook_tasks = {
     "01_example_notebook_interactive_ipynb": {
         "path": "./src/01_example_notebook_interactive_ipynb.py",
@@ -226,7 +181,6 @@ notebook_tasks = {
         "targets": [],
     },
 }
-
 
 # fmt: off
 def task_run_notebooks():
@@ -257,127 +211,3 @@ def task_run_notebooks():
             "clean": True,
         }
 # fmt: on
-
-###############################################################
-## Task below is for LaTeX compilation
-###############################################################
-
-
-def task_compile_latex_docs():
-    """Compile the LaTeX documents to PDFs"""
-    file_dep = [
-        "./reports/report_example.tex",
-        "./reports/my_article_header.sty",
-        "./reports/slides_example.tex",
-        "./reports/my_beamer_header.sty",
-        "./reports/my_common_header.sty",
-        "./reports/report_simple_example.tex",
-        "./reports/slides_simple_example.tex",
-        "./src/example_plot.py",
-        "./src/example_table.py",
-    ]
-    targets = [
-        "./reports/report_example.pdf",
-        "./reports/slides_example.pdf",
-        "./reports/report_simple_example.pdf",
-        "./reports/slides_simple_example.pdf",
-    ]
-
-    return {
-        "actions": [
-            # My custom LaTeX templates
-            "latexmk -xelatex -halt-on-error -cd ./reports/report_example.tex",  # Compile
-            "latexmk -xelatex -halt-on-error -c -cd ./reports/report_example.tex",  # Clean
-            "latexmk -xelatex -halt-on-error -cd ./reports/slides_example.tex",  # Compile
-            "latexmk -xelatex -halt-on-error -c -cd ./reports/slides_example.tex",  # Clean
-            # Simple templates based on small adjustments to Overleaf templates
-            "latexmk -xelatex -halt-on-error -cd ./reports/report_simple_example.tex",  # Compile
-            "latexmk -xelatex -halt-on-error -c -cd ./reports/report_simple_example.tex",  # Clean
-            "latexmk -xelatex -halt-on-error -cd ./reports/slides_simple_example.tex",  # Compile
-            "latexmk -xelatex -halt-on-error -c -cd ./reports/slides_simple_example.tex",  # Clean
-        ],
-        "targets": targets,
-        "file_dep": file_dep,
-        "clean": True,
-    }
-
-##############################################################
-# R Tasks - Uncomment if you have R installed
-##############################################################
-
-
-def task_install_r_packages():
-    """Install R packages"""
-    file_dep = [
-        "r_requirements.txt",
-        "./src/install_packages.R",
-    ]
-    targets = [OUTPUT_DIR / "R_packages_installed.txt"]
-
-    return {
-        "actions": [
-            "Rscript ./src/install_packages.R",
-        ],
-        "targets": targets,
-        "file_dep": file_dep,
-        "clean": True,
-    }
-
-
-def task_example_r_script():
-    """Example R plots"""
-    file_dep = [
-        "./src/example_r_plot.R"
-    ]
-    targets = [
-        OUTPUT_DIR / "example_r_plot.png",
-    ]
-
-    return {
-        "actions": [
-            "Rscript ./src/example_r_plot.R",
-        ],
-        "targets": targets,
-        "file_dep": file_dep,
-        "clean": True,
-    }
-
-
-rmarkdown_tasks = {
-    "04_example_regressions.Rmd": {
-        "file_dep": [],
-        "targets": [],
-    },
-}
-
-
-def task_knit_RMarkdown_files():
-    """Preps the RMarkdown files for presentation format.
-    This will knit the RMarkdown files for easier sharing of results.
-    """
-    str_output_dir = str(OUTPUT_DIR).replace("\\", "/")
-    def knit_string(file):
-        return (
-            "Rscript -e "
-            '"library(rmarkdown); '
-            f"rmarkdown::render('./src/{file}.Rmd', "
-            "output_format='html_document', "
-            f"output_dir='{str_output_dir}')\""
-        )
-
-    for notebook in rmarkdown_tasks.keys():
-        notebook_name = notebook.split(".")[0]
-        file_dep = [f"./src/{notebook}", *rmarkdown_tasks[notebook]["file_dep"]]
-        html_file = f"{notebook_name}.html"
-        targets = [f"{OUTPUT_DIR / html_file}", *rmarkdown_tasks[notebook]["targets"]]
-        actions = [
-            knit_string(notebook_name)
-        ]
-
-        yield {
-            "name": notebook,
-            "actions": actions,
-            "file_dep": file_dep,
-            "targets": targets,
-            "clean": True,
-        }
