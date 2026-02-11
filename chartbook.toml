@@ -25,7 +25,7 @@ favicon_path = ""
 
 [dataframes.fred_parquet]
 type = "parquet"
-data_sources = """
+data_sources = '''
 Interest Rates:
 "DGS1MO": "1-Month Treasury Yield",
 "DGS3MO": "3-Month Treasury Yield",
@@ -33,7 +33,7 @@ Interest Rates:
 "DGS1": "1-Year Treasury Yield",
 "DGS2": "2-Year Treasury Yield",
 "DGS3": "3-Year Treasury Yield"
-"""
+'''
 
 data_providers = "FRED (Federal Reserve Bank of St. Louis)"
 dataframe_docs_path = "./metadata_vals/fred_data.md"
