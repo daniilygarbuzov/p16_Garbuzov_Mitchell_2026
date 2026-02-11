@@ -53,9 +53,14 @@ $ product_code          <i64> 2108
 | Data available up to (min)     | 2026-02-04 00:00:00                                                             |
 | Data available up to (max)     | 2026-02-04 00:00:00                                                             |
 | Dataframe Path                 | /Users/daniilg/FinM/329/p16_Garbuzov_Mitchell_2026/p16_slug/_data/wrds_futures.parquet                                                   |
-| Download Data as Parquet       | [Parquet](../../download_dataframe/TR/wrds_futures_parquet.parquet)         |
-| Download Data as Excel         | [Excel](../../download_dataframe/TR/wrds_futures_parquet.xlsx)              |
-| Linked Charts                  |   [TR:wrds_futures_parquet](../../charts/TR.wrds_futures_parquet.md)<br>   |
+
+
+**Linked Charts:**
+
+
+- [TR:wrds_futures_parquet](../../charts/TR.wrds_futures_parquet.md)
+
+
 
 ## Pipeline Manifest
 
@@ -66,7 +71,7 @@ $ product_code          <i64> 2108
 | Contributors                    | Garbuzov & Mitchell           |
 | Git Repo URL                    | p16_Garbuzov_Mitchell_2026                        |
 | Pipeline Web Page               | <a href="file:///Users/daniilg/FinM/329/p16_Garbuzov_Mitchell_2026/docs/index.html">Pipeline Web Page      |
-| Date of Last Code Update        | 2026-02-10 23:03:27           |
+| Date of Last Code Update        | 2026-02-10 23:18:28           |
 | OS Compatibility                |  |
 | Linked Dataframes               |  [TR:fred_parquet](../dataframes/TR/fred_parquet.md)<br>  [TR:wrds_futures_parquet](../dataframes/TR/wrds_futures_parquet.md)<br>  |
 

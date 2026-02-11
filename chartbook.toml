@@ -77,11 +77,11 @@ chart_name = "Interest rates over time"
 short_description_chart = "Plotting US interest rates over time from 1986 to 2010"
 chart_docs_path = "./metadata_vals/fred_graph.md"
 dataframe_id = "fred_parquet"
-path_to_html_chart = "./p16_slug/_output/treasury_yields.html"
+path_to_html_chart = "p16_slug/_output/treasury_yields.html"
 
 [charts.wrds_futures_parquet]
 chart_name = "Futures settlements over time"
 short_description_chart = "Aggregation of futures settlements over time for various commodities"
 chart_docs_path = "./metadata_vals/wrds_futures_graph.md"
 dataframe_id = "wrds_futures_parquet"
-path_to_html_chart = "./p16_slug/_output/futures_settlements.html"
+path_to_html_chart = "p16_slug/_output/futures_settlements.html"
