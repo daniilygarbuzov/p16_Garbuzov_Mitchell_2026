@@ -3,7 +3,7 @@ type = "pipeline"
 chartbook_format_version = "0.0.2"
 
 [pipeline]
-id = "TR"  # ADD THIS WHOLE TABLE
+id = "TR"
 pipeline_name = "Commodities Paper Replication"
 pipeline_description = "A data science project"
 lead_pipeline_developer = "Garbuzov & Mitchell"
@@ -25,6 +25,7 @@ favicon_path = ""
 
 [dataframes.fred_parquet]
 type = "parquet"
+date_col = "index"  # Dates are in the DataFrame index
 data_sources = '''
 Interest Rates:
 "DGS1MO": "1-Month Treasury Yield",
@@ -34,21 +35,14 @@ Interest Rates:
 "DGS2": "2-Year Treasury Yield",
 "DGS3": "3-Year Treasury Yield"
 '''
-
 data_providers = "FRED (Federal Reserve Bank of St. Louis)"
 dataframe_docs_path = "./metadata_vals/fred_data.md"
 how_is_pulled = "API Call: df = web.DataReader(list(series_to_pull.keys()), \"fred\", start_date, end_date)"
 path_to_parquet_data = "./p16_slug/_data/fred.parquet"
 
-[charts.fred_parquet]
-chart_name = "Interest rates over time"
-short_description_chart = "Plotting US interest rates over time from 1986 to 2010"
-chart_docs_path = "./metadata_vals/fred_graph.md"
-dataframe_id = "fred_parquet"
-path_to_output_chart = "./p16_slug/_output/treasury_yields.png"
-
 [dataframes.wrds_futures_parquet]
 type = "parquet"
+date_col = "date"  # Explicit date column confirmed
 data_sources = """
 TR_DS_COMDS_SERIES:
 "heating_oil": 7796,
@@ -73,15 +67,21 @@ TR_DS_COMDS_SERIES:
 "cotton": 792,
 "lumber": 16751
 """
-
 data_providers = "LSEG (London Stock Exchange Group) through WRDS"
 dataframe_docs_path = "./metadata_vals/wrds_futures_data.md"
 how_is_pulled = "API Call: df = db.raw_sql(query)"
 path_to_parquet_data = "./p16_slug/_data/wrds_futures.parquet"
+
+[charts.fred_parquet]
+chart_name = "Interest rates over time"
+short_description_chart = "Plotting US interest rates over time from 1986 to 2010"
+chart_docs_path = "./metadata_vals/fred_graph.md"
+dataframe_id = "fred_parquet"
+path_to_html_chart = "./p16_slug/_output/treasury_yields.html"
 
 [charts.wrds_futures_parquet]
 chart_name = "Futures settlements over time"
 short_description_chart = "Aggregation of futures settlements over time for various commodities"
 chart_docs_path = "./metadata_vals/wrds_futures_graph.md"
 dataframe_id = "wrds_futures_parquet"
-path_to_output_chart = "./p16_slug/_output/futures_settlements.png"
+path_to_html_chart = "./p16_slug/_output/futures_settlements.html"

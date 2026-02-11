@@ -5,6 +5,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import matplotlib.pyplot as plt
 import pandas as pd
+import plotly.tools as tls
+import plotly.graph_objects as go
 
 from settings import config
 from pull_FRED import load_fred
@@ -25,7 +27,10 @@ try:
     ax.legend()
     ax.grid(True, alpha=0.3)
     fig.tight_layout()
-    fig.savefig(Path(OUTPUT_DIR) / "treasury_yields.png", dpi=150)
+
+#   Convert to Plotly and save HTML
+    plotly_fig = tls.mpl_to_plotly(fig)
+    plotly_fig.write_html(Path(OUTPUT_DIR) / "treasury_yields.html")
     plt.close(fig)
     print("Treasury yields chart saved.")
 except FileNotFoundError:
@@ -44,6 +49,11 @@ try:
     if df_futures["product_code"].nunique() <= 10:
         ax.legend()
     fig.tight_layout()
+    
+    # Convert to Plotly and save HTML
+    plotly_fig = tls.mpl_to_plotly(fig)
+    plotly_fig.write_html(Path(OUTPUT_DIR) / "futures_settlements.html")
+    plt.close(fig)
     fig.savefig(Path(OUTPUT_DIR) / "futures_settlements.png", dpi=150)
     plt.close(fig)
     print("Futures settlements chart saved.")
