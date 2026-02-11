@@ -1,5 +1,5 @@
 ---
-date: 2026-02-10 23:03:27
+date: 2026-02-10 23:18:28
 tags: T, R, _, D, S, _, C, O, M, D, S, _, S, E, R, I, E, S, :, 
 , ", h, e, a, t, i, n, g, _, o, i, l, ", :,  , 7, 7, 9, 6, ,, 
 , ", g, a, s, ", :,  , 1, 6, 0, 9, ,, 
@@ -118,9 +118,14 @@ Aggregation of futures settlements over time for various commodities
 | Data available up to (min)     |                                                              |
 | Data available up to (max)     |                                                              |
 | Dataframe Path                 | /Users/daniilg/FinM/329/p16_Garbuzov_Mitchell_2026/p16_slug/_data/wrds_futures.parquet                                                   |
-| Download Data as Parquet       | [Parquet](../../download_dataframe/TR/wrds_futures_parquet.parquet)         |
-| Download Data as Excel         | [Excel](../../download_dataframe/TR/wrds_futures_parquet.xlsx)              |
-| Linked Charts                  |   [TR:wrds_futures_parquet](../../charts/TR.wrds_futures_parquet.md)<br>   |
+
+
+**Linked Charts:**
+
+
+- [TR:wrds_futures_parquet](../../charts/TR.wrds_futures_parquet.md)
+
+
 
 ## Pipeline Manifest
 
@@ -131,7 +136,7 @@ Aggregation of futures settlements over time for various commodities
 | Contributors                    | Garbuzov & Mitchell           |
 | Git Repo URL                    | p16_Garbuzov_Mitchell_2026                        |
 | Pipeline Web Page               | <a href="file:///Users/daniilg/FinM/329/p16_Garbuzov_Mitchell_2026/docs/index.html">Pipeline Web Page      |
-| Date of Last Code Update        | 2026-02-10 23:03:27           |
+| Date of Last Code Update        | 2026-02-10 23:18:28           |
 | OS Compatibility                |  |
 | Linked Dataframes               |  [TR:fred_parquet](../dataframes/TR/fred_parquet.md)<br>  [TR:wrds_futures_parquet](../dataframes/TR/wrds_futures_parquet.md)<br>  |
 

@@ -1,5 +1,5 @@
 ---
-date: 2026-02-10 23:03:27
+date: 2026-02-10 23:18:28
 tags: I, n, t, e, r, e, s, t,  , R, a, t, e, s, :, 
 , ", D, G, S, 1, M, O, ", :,  , ", 1, -, M, o, n, t, h,  , T, r, e, a, s, u, r, y,  , Y, i, e, l, d, ", ,, 
 , ", D, G, S, 3, M, O, ", :,  , ", 3, -, M, o, n, t, h,  , T, r, e, a, s, u, r, y,  , Y, i, e, l, d, ", ,, 
@@ -73,9 +73,14 @@ Plotting US interest rates over time from 1986 to 2010
 | Data available up to (min)     |                                                              |
 | Data available up to (max)     |                                                              |
 | Dataframe Path                 | /Users/daniilg/FinM/329/p16_Garbuzov_Mitchell_2026/p16_slug/_data/fred.parquet                                                   |
-| Download Data as Parquet       | [Parquet](../../download_dataframe/TR/fred_parquet.parquet)         |
-| Download Data as Excel         | [Excel](../../download_dataframe/TR/fred_parquet.xlsx)              |
-| Linked Charts                  |   [TR:fred_parquet](../../charts/TR.fred_parquet.md)<br>   |
+
+
+**Linked Charts:**
+
+
+- [TR:fred_parquet](../../charts/TR.fred_parquet.md)
+
+
 
 ## Pipeline Manifest
 
@@ -86,7 +91,7 @@ Plotting US interest rates over time from 1986 to 2010
 | Contributors                    | Garbuzov & Mitchell           |
 | Git Repo URL                    | p16_Garbuzov_Mitchell_2026                        |
 | Pipeline Web Page               | <a href="file:///Users/daniilg/FinM/329/p16_Garbuzov_Mitchell_2026/docs/index.html">Pipeline Web Page      |
-| Date of Last Code Update        | 2026-02-10 23:03:27           |
+| Date of Last Code Update        | 2026-02-10 23:18:28           |
 | OS Compatibility                |  |
 | Linked Dataframes               |  [TR:fred_parquet](../dataframes/TR/fred_parquet.md)<br>  [TR:wrds_futures_parquet](../dataframes/TR/wrds_futures_parquet.md)<br>  |
 
