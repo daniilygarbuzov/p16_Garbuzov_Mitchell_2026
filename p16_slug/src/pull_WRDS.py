@@ -11,7 +11,7 @@ sys.path.insert(1, "./src/")
 import pandas as pd
 import polars as pl
 import wrds
-import chartbook
+
 
 DATA_DIR = config("DATA_DIR")
 WRDS_USERNAME = config("WRDS_USERNAME")
