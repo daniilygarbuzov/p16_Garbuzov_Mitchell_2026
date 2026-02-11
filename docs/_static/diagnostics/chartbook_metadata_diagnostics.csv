@@ -1,6 +1,6 @@
 Name,Metadata Complete,Object Type,Identifier,Pipeline,Missing Fields,Page Link
-Commodities Paper Replication,False,pipeline,TR,TR,"build_commands, os_compatibility",../index.html
-fred_parquet,False,dataframe,fred_parquet,TR,"dataframe_name, short_description_df, links_to_data_providers, topic_tags",../dataframes/TR/fred_parquet.html
-wrds_futures_parquet,False,dataframe,wrds_futures_parquet,TR,"dataframe_name, short_description_df, links_to_data_providers, topic_tags",../dataframes/TR/wrds_futures_parquet.html
-Interest rates over time,False,chart,fred_parquet,TR,"topic_tags, data_frequency, observation_period, lag_in_data_release, data_release_timing, units",../charts/TR.fred_parquet.html
-Futures settlements over time,False,chart,wrds_futures_parquet,TR,"topic_tags, data_frequency, observation_period, lag_in_data_release, data_release_timing, units",../charts/TR.wrds_futures_parquet.html
+Garbuzov & Mitchell Replication,False,pipeline,MYPROJ,MYPROJ,"build_commands, os_compatibility",../index.html
+Treasury Yields,False,dataframe,treasury_yields,MYPROJ,"links_to_data_providers, topic_tags",../dataframes/MYPROJ/treasury_yields.html
+Futures settlements,False,dataframe,futures_settlements,MYPROJ,"links_to_data_providers, topic_tags",../dataframes/MYPROJ/futures_settlements.html
+Treasury Yields,False,chart,treasury_yields,MYPROJ,"topic_tags, data_frequency, observation_period, lag_in_data_release, data_release_timing, units",../charts/MYPROJ.treasury_yields.html
+Futures settlements,False,chart,futures_settlements,MYPROJ,"topic_tags, data_frequency, observation_period, lag_in_data_release, data_release_timing, units",../charts/MYPROJ.futures_settlements.html

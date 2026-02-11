@@ -1,4 +1,4 @@
-# Commodities Paper Replication
+# Garbuzov & Mitchell Replication
 
 Last updated: {sub-ref}`today` 
 
@@ -27,8 +27,8 @@ charts.md
 ```{toctree}
 :maxdepth: 1
 :caption: Pipeline Dataframes 📊
-dataframes/TR/fred_parquet.md
-dataframes/TR/wrds_futures_parquet.md
+dataframes/MYPROJ/futures_settlements.md
+dataframes/MYPROJ/treasury_yields.md
 ```
 
 
@@ -41,16 +41,16 @@ apidocs/index
 
 
 ## Pipeline Specs
-| Pipeline Name                   | Commodities Paper Replication                       |
+| Pipeline Name                   | Garbuzov & Mitchell Replication                       |
 |---------------------------------|--------------------------------------------------------|
-| Pipeline ID                     | [TR](./index.md)              |
+| Pipeline ID                     | [MYPROJ](./index.md)              |
 | Lead Pipeline Developer         | Garbuzov & Mitchell             |
-| Contributors                    | Garbuzov & Mitchell           |
-| Git Repo URL                    | p16_Garbuzov_Mitchell_2026                        |
+| Contributors                    | Daniil Garbuzov, Oliver Mitchell           |
+| Git Repo URL                    | https://github.com/daniilygarbuzov/p16_Garbuzov_Mitchell_2026                        |
 | Pipeline Web Page               | <a href="file:///Users/daniilg/FinM/329/p16_Garbuzov_Mitchell_2026/docs/index.html">Pipeline Web Page      |
-| Date of Last Code Update        | 2026-02-10 23:18:28           |
+| Date of Last Code Update        | 2026-02-11 14:07:45           |
 | OS Compatibility                |  |
-| Linked Dataframes               |  [TR:fred_parquet](./dataframes/TR/fred_parquet.md)<br>  [TR:wrds_futures_parquet](./dataframes/TR/wrds_futures_parquet.md)<br>  |
+| Linked Dataframes               |  [MYPROJ:treasury_yields](./dataframes/MYPROJ/treasury_yields.md)<br>  [MYPROJ:futures_settlements](./dataframes/MYPROJ/futures_settlements.md)<br>  |
 
 
 
