@@ -133,6 +133,27 @@ def task_pull_CRB():
 
 def task_pull_FRED():
     """Pull data from FRED website"""
+    return {
+        "actions": [
+            "ipython ./src/settings.py",
+            "ipython ./src/pull_FRED.py",
+        ],
+        "targets": [DATA_DIR / "fred.parquet"],
+        "file_dep": ["./src/settings.py", "./src/pull_FRED.py"],
+        "clean": [],
+    }
+
+def task_pull_WRDS():
+    """Pull futures data from WRDS"""
+    return {
+        "actions": [
+            "ipython ./src/settings.py",
+            "ipython ./src/pull_WRDS.py",
+        ],
+        "targets": [DATA_DIR / "wrds_futures.parquet"],
+        "file_dep": ["./src/settings.py", "./src/pull_WRDS.py"],
+        "clean": [],
+    }
 
 def task_pull():
     """Pull data from external sources"""
@@ -157,6 +178,24 @@ def task_pull():
         "targets": [DATA_DIR / "CRSP_Compustat.parquet"],
         "file_dep": ["./src/settings.py", "./src/pull_CRSP_compustat.py"],
         "clean": [],
+    }
+
+
+def task_exploratory_charts():
+    """Generate exploratory charts"""
+    file_dep = [
+        "./src/exploratory_charts.py",
+    ]
+    targets = [
+        OUTPUT_DIR / "treasury_yields.png",
+    ]
+    return {
+        "actions": [
+            "ipython ./src/exploratory_charts.py",
+        ],
+        "targets": targets,
+        "file_dep": file_dep,
+        "clean": True,
     }
 
 
