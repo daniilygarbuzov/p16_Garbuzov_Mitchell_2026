@@ -1,6 +1,0 @@
-Name,Metadata Complete,Object Type,Identifier,Pipeline,Missing Fields,Page Link
-Garbuzov & Mitchell Replication,False,pipeline,MYPROJ,MYPROJ,"build_commands, os_compatibility",../index.html
-Treasury Yields,False,dataframe,treasury_yields,MYPROJ,"links_to_data_providers, topic_tags",../dataframes/MYPROJ/treasury_yields.html
-Futures settlements,False,dataframe,futures_settlements,MYPROJ,"links_to_data_providers, topic_tags",../dataframes/MYPROJ/futures_settlements.html
-Treasury Yields,False,chart,treasury_yields,MYPROJ,"topic_tags, data_frequency, observation_period, lag_in_data_release, data_release_timing, units",../charts/MYPROJ.treasury_yields.html
-Futures settlements,False,chart,futures_settlements,MYPROJ,"topic_tags, data_frequency, observation_period, lag_in_data_release, data_release_timing, units",../charts/MYPROJ.futures_settlements.html
