@@ -21,6 +21,7 @@ OUTPUT_DIR = config("OUTPUT_DIR")
 # Map product_code -> (commodity_name, sector)
 # Based on date ranges and known commodities in the paper
 # Need to plug in correct codes
+
 PRODUCT_MAP = {
     1986: ("crude_oil",     "Energy"),
     2091: ("gasoline",      "Energy"),
@@ -30,11 +31,11 @@ PRODUCT_MAP = {
     2108: ("silver",        "Metals"),
     3247: ("corn",          "Grains"),
     430:  ("wheat",         "Grains"),
-    396:  ("soybeans",      "Grains"),
     385:  ("oats",          "Grains"),
     379:  ("rough_rice",    "Grains"),
     3256: ("soybean_meal",  "Oilseeds"),
-    # 282: ("soybean_oil", "Oilseeds"),  # needs fresh pull
+    282:  ("soybean_oil",   "Oilseeds"),
+    396:  ("soybeans",      "Oilseeds"),
     3250: ("feeder_cattle", "Meats"),
     2675: ("live_cattle",   "Meats"),
     2676: ("lean_hogs",     "Meats"),
@@ -45,17 +46,17 @@ PRODUCT_MAP = {
     361:  ("lumber",        "Ind_Materials"),
 }
 
+
+    
 def parse_contrdate(s):
     """
-    Convert YYMM string like '0983' -> datetime(1983, 9, 1).
-    First two chars = month (MM... wait, actually MMYY).
-    '0983' = month 09, year 83 = September 1983.
+    Convert MMYY string like '0983' -> datetime(1983, 9, 1).
     """
-    s = str(s).zfill(4)
-    mm = int(s[:2])
-    yy = int(s[2:])
-    yyyy = 1900 + yy if yy >= 50 else 2000 + yy
     try:
+        s = str(s).zfill(4)
+        mm = int(s[:2])
+        yy = int(s[2:])
+        yyyy = 1900 + yy if yy >= 50 else 2000 + yy
         return pd.Timestamp(year=yyyy, month=mm, day=1)
     except Exception:
         return pd.NaT
