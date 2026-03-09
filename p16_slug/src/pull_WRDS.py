@@ -11,7 +11,11 @@ sys.path.insert(1, "./src/")
 import pandas as pd
 import polars as pl
 import wrds
+<<<<<<< HEAD
 import chartbook
+=======
+
+>>>>>>> 78ddf03ec1bd176dd908f4be26647081829fc04e
 
 DATA_DIR = config("DATA_DIR")
 WRDS_USERNAME = config("WRDS_USERNAME")
@@ -107,6 +111,10 @@ def pull_all_futures_data():
         379, 3256, 396, 430, 1986, 2091, 2029, 2060, 3847, 2032,
         3250, 2676, 2675, 3126, 2087, 2026, 2020, 2065, 2074, 2108,
     ]
+<<<<<<< HEAD
+=======
+    
+>>>>>>> 78ddf03ec1bd176dd908f4be26647081829fc04e
     all_frames = []
     for code in product_list:
         info_df = fetch_wrds_contract_info(code)

@@ -155,6 +155,7 @@ def task_pull_WRDS():
         "clean": [],
     }
 
+<<<<<<< HEAD
 def task_pull():
     """Pull data from external sources"""
     yield {
@@ -180,6 +181,8 @@ def task_pull():
         "clean": [],
     }
 
+=======
+>>>>>>> 78ddf03ec1bd176dd908f4be26647081829fc04e
 
 def task_exploratory_charts():
     """Generate exploratory charts"""
@@ -199,6 +202,7 @@ def task_exploratory_charts():
     }
 
 
+<<<<<<< HEAD
 def task_summary_stats():
     """Generate summary statistics tables"""
     file_dep = ["./src/example_table.py"]
@@ -219,6 +223,8 @@ def task_summary_stats():
     }
 
 
+=======
+>>>>>>> 78ddf03ec1bd176dd908f4be26647081829fc04e
 notebook_tasks = {
     "01_example_notebook_interactive_ipynb": {
         "path": "./src/01_example_notebook_interactive_ipynb.py",
@@ -227,7 +233,10 @@ notebook_tasks = {
     },
 }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 78ddf03ec1bd176dd908f4be26647081829fc04e
 # fmt: off
 def task_run_notebooks():
     """Preps the notebooks for presentation format.
@@ -257,6 +266,7 @@ def task_run_notebooks():
             "clean": True,
         }
 # fmt: on
+<<<<<<< HEAD
 
 ###############################################################
 ## Task below is for LaTeX compilation
@@ -381,3 +391,5 @@ def task_knit_RMarkdown_files():
             "targets": targets,
             "clean": True,
         }
+=======
+>>>>>>> 78ddf03ec1bd176dd908f4be26647081829fc04e
