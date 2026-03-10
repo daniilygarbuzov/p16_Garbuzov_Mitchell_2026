@@ -1,14 +1,8 @@
 """Run or update the project. This file uses the `doit` Python package. It works
-like a Makefile, but is Python-based
-
+like a Makefile, but is Python-based.
 """
 
-#######################################
-## Configuration and Helpers for PyDoit
-#######################################
-## Make sure the src folder is in the path
 import sys
-
 sys.path.insert(1, "./src/")
 
 import shutil
@@ -16,16 +10,7 @@ from os import environ, getcwd, path
 from pathlib import Path
 
 from colorama import Fore, Style, init
-
-## Custom reporter: Print PyDoit Text in Green
-# This is helpful because some tasks write to sterr and pollute the output in
-# the console. I don't want to mute this output, because this can sometimes
-# cause issues when, for example, LaTeX hangs on an error and requires
-# presses on the keyboard before continuing. However, I want to be able
-# to easily see the task lines printed by PyDoit. I want them to stand out
-# from among all the other lines printed to the console.
 from doit.reporter import ConsoleReporter
-
 from settings import config
 
 try:
@@ -51,72 +36,57 @@ class GreenReporter(ConsoleReporter):
 if not in_slurm:
     DOIT_CONFIG = {
         "reporter": GreenReporter,
-        # other config here...
-        # "cleanforget": True, # Doit will forget about tasks that have been cleaned.
         "backend": "sqlite3",
         "dep_file": "./.doit-db.sqlite",
     }
 else:
     DOIT_CONFIG = {"backend": "sqlite3", "dep_file": "./.doit-db.sqlite"}
+
 init(autoreset=True)
 
-
-BASE_DIR = config("BASE_DIR")
-DATA_DIR = config("DATA_DIR")
+DATA_DIR        = config("DATA_DIR")
 MANUAL_DATA_DIR = config("MANUAL_DATA_DIR")
-OUTPUT_DIR = config("OUTPUT_DIR")
-OS_TYPE = config("OS_TYPE")
-USER = config("USER")
+OUTPUT_DIR      = config("OUTPUT_DIR")
+OS_TYPE         = config("OS_TYPE")
 
-## Helpers for handling Jupyter Notebook tasks
 environ["PYDEVD_DISABLE_FILE_VALIDATION"] = "1"
+
 # fmt: off
-## Helper functions for automatic execution of Jupyter notebooks
 def jupyter_execute_notebook(notebook_path):
     return f"jupyter nbconvert --execute --to notebook --ClearMetadataPreprocessor.enabled=True --inplace {notebook_path}"
 def jupyter_to_html(notebook_path, output_dir=OUTPUT_DIR):
     return f"jupyter nbconvert --to html --output-dir={output_dir} {notebook_path}"
-def jupyter_to_md(notebook_path, output_dir=OUTPUT_DIR):
-    """Requires jupytext"""
-    return f"jupytext --to markdown --output-dir={output_dir} {notebook_path}"
 def jupyter_clear_output(notebook_path):
-    """Clear the output of a notebook"""
     return f"jupyter nbconvert --ClearOutputPreprocessor.enabled=True --ClearMetadataPreprocessor.enabled=True --inplace {notebook_path}"
 # fmt: on
 
 
 def mv(from_path, to_path):
-    """Move a file to a folder"""
     from_path = Path(from_path)
-    to_path = Path(to_path)
+    to_path   = Path(to_path)
     to_path.mkdir(parents=True, exist_ok=True)
     if OS_TYPE == "nix":
-        command = f"mv {from_path} {to_path}"
+        return f"mv {from_path} {to_path}"
     else:
-        command = f"move {from_path} {to_path}"
-    return command
+        return f"move {from_path} {to_path}"
 
 
 def copy_file(origin_path, destination_path, mkdir=True):
-    """Create a Python action for copying a file."""
-
     def _copy_file():
         origin = Path(origin_path)
-        dest = Path(destination_path)
+        dest   = Path(destination_path)
         if mkdir:
             dest.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(origin, dest)
-
     return _copy_file
 
 
 ##################################
-## Begin rest of PyDoit tasks here
+## Pipeline tasks
 ##################################
 
-
 def task_config():
-    """Create empty directories for data and output if they don't exist"""
+    """Create empty directories for data and output if they don't exist."""
     return {
         "actions": ["ipython ./src/settings.py"],
         "targets": [DATA_DIR, OUTPUT_DIR],
@@ -125,113 +95,169 @@ def task_config():
     }
 
 
-<<<<<<< HEAD
-def task_pull_FRED():
-    """Pull data from FRED website"""
+def task_pull_wrds():
+    """Pull raw futures settlement data from WRDS."""
     return {
-        "actions": [
-            "ipython ./src/settings.py",
-            "ipython ./src/pull_FRED.py",
-        ],
-        "targets": [DATA_DIR / "fred.parquet"],
-        "file_dep": ["./src/settings.py", "./src/pull_FRED.py"],
-        "clean": [],
-    }
-
-def task_pull_WRDS():
-    """Pull futures data from WRDS"""
-    return {
-        "actions": [
-            "ipython ./src/settings.py",
-            "ipython ./src/pull_WRDS.py",
-        ],
-        "targets": [DATA_DIR / "wrds_futures.parquet"],
-        "file_dep": ["./src/settings.py", "./src/pull_WRDS.py"],
-        "clean": [],
-    }
-
-<<<<<<< HEAD
-def task_pull():
-    """Pull data from external sources"""
-    yield {
-        "name": "crsp_stock",
-        "doc": "Pull CRSP stock data from WRDS",
-=======
-def task_pull_WRDS():
-    """Pull futures data from WRDS"""
-    return {
->>>>>>> f1e88fce90b65662266708504274cac43c79b921
-        "actions": [
-            "ipython ./src/settings.py",
-            "ipython ./src/pull_wrds_clean.py",
-        ],
+        "actions": ["ipython ./src/pull_wrds_clean.py"],
         "targets": [DATA_DIR / "wrds_futures.parquet"],
         "file_dep": ["./src/settings.py", "./src/pull_wrds_clean.py"],
         "clean": [],
     }
 
 
+def task_build_clean_data():
+    """Build bimonthly commodity panel (original sample 1986-2010)."""
+    return {
+        "actions": ["ipython ./src/build_clean_data.py"],
+        "targets": [DATA_DIR / "commodity_panel.parquet"],
+        "file_dep": [
+            "./src/build_clean_data.py",
+            DATA_DIR / "wrds_futures.parquet",
+        ],
+        "clean": True,
+    }
+
+
+def task_build_clean_data_extended():
+    """Build bimonthly commodity panel (extended sample 1986-2025)."""
+    return {
+        "actions": ["ipython ./src/build_clean_data_extended.py"],
+        "targets": [DATA_DIR / "commodity_panel_extended.parquet"],
+        "file_dep": [
+            "./src/build_clean_data_extended.py",
+            DATA_DIR / "wrds_futures.parquet",
+        ],
+        "clean": True,
+    }
+
+
+def task_build_returns():
+    """Compute SR and EH returns panel (original sample)."""
+    return {
+        "actions": ["ipython ./src/process_futures.py"],
+        "targets": [DATA_DIR / "returns_panel.parquet"],
+        "file_dep": [
+            "./src/process_futures.py",
+            DATA_DIR / "commodity_panel.parquet",
+        ],
+        "clean": True,
+    }
+
+
+def task_build_returns_extended():
+    """Compute SR and EH returns panel (extended sample)."""
+    return {
+        "actions": ["ipython ./src/process_futures_extended.py"],
+        "targets": [DATA_DIR / "returns_panel_extended.parquet"],
+        "file_dep": [
+            "./src/process_futures_extended.py",
+            DATA_DIR / "commodity_panel_extended.parquet",
+        ],
+        "clean": True,
+    }
+
+
+def task_create_table_1():
+    """Replicate Table 1 (original sample)."""
+    return {
+        "actions": ["ipython ./src/create_table_1.py"],
+        "targets": [
+            OUTPUT_DIR / "table1_short_roll.csv",
+            OUTPUT_DIR / "table1_excess_holding.csv",
+            OUTPUT_DIR / "table1.tex",
+        ],
+        "file_dep": [
+            "./src/create_table_1.py",
+            DATA_DIR / "returns_panel.parquet",
+        ],
+        "clean": True,
+    }
+
+
+def task_create_table_1_extended():
+    """Replicate Table 1 (extended sample)."""
+    return {
+        "actions": ["ipython ./src/create_table_1_extended.py"],
+        "targets": [
+            OUTPUT_DIR / "table1_extended_short_roll.csv",
+            OUTPUT_DIR / "table1_extended_excess_holding.csv",
+            OUTPUT_DIR / "table1_extended.tex",
+        ],
+        "file_dep": [
+            "./src/create_table_1_extended.py",
+            DATA_DIR / "returns_panel_extended.parquet",
+        ],
+        "clean": True,
+    }
+
+
+def task_create_table_2():
+    """Replicate Table 2 (original sample)."""
+    return {
+        "actions": ["ipython ./src/create_table_2.py"],
+        "targets": [
+            OUTPUT_DIR / "table2_panel_a_sr.csv",
+            OUTPUT_DIR / "table2_panel_a_eh.csv",
+            OUTPUT_DIR / "table2.tex",
+        ],
+        "file_dep": [
+            "./src/create_table_2.py",
+            DATA_DIR / "returns_panel.parquet",
+        ],
+        "clean": True,
+    }
+
+
+def task_create_table_2_extended():
+    """Replicate Table 2 (extended sample)."""
+    return {
+        "actions": ["ipython ./src/create_table_2_extended.py"],
+        "targets": [
+            OUTPUT_DIR / "table2_extended_panel_a_sr.csv",
+            OUTPUT_DIR / "table2_extended_panel_a_eh.csv",
+            OUTPUT_DIR / "table2_extended.tex",
+        ],
+        "file_dep": [
+            "./src/create_table_2_extended.py",
+            DATA_DIR / "returns_panel_extended.parquet",
+        ],
+        "clean": True,
+    }
+
+
 def task_exploratory_charts():
-    """Generate exploratory charts"""
-    file_dep = [
-        "./src/exploratory_charts.py",
-    ]
-    targets = [
-        OUTPUT_DIR / "treasury_yields.png",
-    ]
+    """Generate exploratory charts of futures settlement prices."""
     return {
-        "actions": [
-            "ipython ./src/exploratory_charts.py",
+        "actions": ["ipython ./src/exploratory_charts.py"],
+        "targets": [OUTPUT_DIR / "futures_settlements.png"],
+        "file_dep": [
+            "./src/exploratory_charts.py",
+            DATA_DIR / "wrds_futures.parquet",
         ],
-        "targets": targets,
-        "file_dep": file_dep,
-        "clean": True,
-    }
-
-=======
->>>>>>> 78ddf03ec1bd176dd908f4be26647081829fc04e
-
-def task_exploratory_charts():
-    """Generate exploratory charts"""
-    file_dep = [
-        "./src/exploratory_charts.py",
-    ]
-    targets = [
-        OUTPUT_DIR / "treasury_yields.png",
-    ]
-    return {
-        "actions": [
-            "ipython ./src/exploratory_charts.py",
-        ],
-        "targets": targets,
-        "file_dep": file_dep,
         "clean": True,
     }
 
 
-<<<<<<< HEAD
-def task_summary_stats():
-    """Generate summary statistics tables"""
-    file_dep = ["./src/example_table.py"]
-    file_output = [
-        "example_table.tex",
-        "pandas_to_latex_simple_table1.tex",
-    ]
-    targets = [OUTPUT_DIR / file for file in file_output]
-
+def task_test():
+    """Run replication unit tests."""
     return {
-        "actions": [
-            "ipython ./src/example_table.py",
-            "ipython ./src/pandas_to_latex_demo.py",
+        "actions": ["pytest src/test_replication.py -v"],
+        "file_dep": [
+            "./src/test_replication.py",
+            DATA_DIR / "returns_panel.parquet",
+            OUTPUT_DIR / "table1_short_roll.csv",
+            OUTPUT_DIR / "table1_excess_holding.csv",
+            OUTPUT_DIR / "table2_panel_a_sr.csv",
+            OUTPUT_DIR / "table2_panel_b1_sr.csv",
         ],
-        "targets": targets,
-        "file_dep": file_dep,
-        "clean": True,
+        "verbosity": 2,
     }
 
 
-=======
->>>>>>> 78ddf03ec1bd176dd908f4be26647081829fc04e
+##################################
+## Notebook tasks
+##################################
+
 notebook_tasks = {
     "example_notebook_interactive_ipynb": {
         "path": "./src/example_notebook_interactive_ipynb.py",
@@ -240,173 +266,43 @@ notebook_tasks = {
     },
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-=======
->>>>>>> 78ddf03ec1bd176dd908f4be26647081829fc04e
-=======
->>>>>>> f1e88fce90b65662266708504274cac43c79b921
 # fmt: off
 def task_run_notebooks():
-    """Preps the notebooks for presentation format.
-    Execute notebooks if the script version of it has been changed.
-    """
-    for notebook in notebook_tasks.keys():
-        pyfile_path = Path(notebook_tasks[notebook]["path"])
+    """Execute notebooks and export to HTML."""
+    for notebook, meta in notebook_tasks.items():
+        pyfile_path   = Path(meta["path"])
         notebook_path = pyfile_path.with_suffix(".ipynb")
         yield {
             "name": notebook,
             "actions": [
-                """python -c "import sys; from datetime import datetime; print(f'Start """ + notebook + """: {datetime.now()}', file=sys.stderr)" """,
                 f"jupytext --to notebook --output {notebook_path} {pyfile_path}",
                 jupyter_execute_notebook(notebook_path),
                 jupyter_to_html(notebook_path),
                 mv(notebook_path, OUTPUT_DIR),
-                """python -c "import sys; from datetime import datetime; print(f'End """ + notebook + """: {datetime.now()}', file=sys.stderr)" """,
             ],
-            "file_dep": [
-                pyfile_path,
-                *notebook_tasks[notebook]["file_dep"],
-            ],
-            "targets": [
-                OUTPUT_DIR / f"{notebook}.html",
-                *notebook_tasks[notebook]["targets"],
-            ],
+            "file_dep": [pyfile_path, *meta["file_dep"]],
+            "targets": [OUTPUT_DIR / f"{notebook}.html", *meta["targets"]],
             "clean": True,
         }
 # fmt: on
-<<<<<<< HEAD
 
-###############################################################
-## Task below is for LaTeX compilation
-###############################################################
 
+##################################
+## LaTeX compilation
+##################################
 
 def task_compile_latex_docs():
-    """Compile the LaTeX documents to PDFs"""
-    file_dep = [
-        "./reports/report_example.tex",
-        "./reports/my_article_header.sty",
-        "./reports/slides_example.tex",
-        "./reports/my_beamer_header.sty",
-        "./reports/my_common_header.sty",
-        "./reports/report_simple_example.tex",
-        "./reports/slides_simple_example.tex",
-        "./reports/replication_summary.tex",
-        "./src/example_plot.py",
-        "./src/example_table.py",
-    ]
-    targets = [
-        "./reports/report_example.pdf",
-        "./reports/replication_summary.pdf",
-        "./reports/slides_example.pdf",
-        "./reports/report_simple_example.pdf",
-        "./reports/slides_simple_example.pdf",
-    ]
-
+    """Compile replication_summary.tex to PDF."""
     return {
         "actions": [
-            # My custom LaTeX templates
-            "latexmk -xelatex -halt-on-error -cd ./reports/report_example.tex",  # Compile
-            "latexmk -xelatex -halt-on-error -c -cd ./reports/report_example.tex",  # Clean
-            "latexmk -xelatex -halt-on-error -cd ./reports/slides_example.tex",  # Compile
-            "latexmk -xelatex -halt-on-error -c -cd ./reports/slides_example.tex",  # Clean
-            # Simple templates based on small adjustments to Overleaf templates
-            "latexmk -xelatex -halt-on-error -cd ./reports/replication_summary.tex",  # Compile
-            "latexmk -xelatex -halt-on-error -c -cd ./reports/replication_summary.tex",  # Clean
-            "latexmk -xelatex -halt-on-error -cd ./reports/report_simple_example.tex",  # Compile
-            "latexmk -xelatex -halt-on-error -c -cd ./reports/report_simple_example.tex",  # Clean
-            "latexmk -xelatex -halt-on-error -cd ./reports/slides_simple_example.tex",  # Compile
-            "latexmk -xelatex -halt-on-error -c -cd ./reports/slides_simple_example.tex",  # Clean
+            "latexmk -xelatex -halt-on-error -cd ./reports/replication_summary.tex",
+            "latexmk -xelatex -halt-on-error -c  -cd ./reports/replication_summary.tex",
         ],
-        "targets": targets,
-        "file_dep": file_dep,
+        "targets": ["./reports/replication_summary.pdf"],
+        "file_dep": [
+            "./reports/replication_summary.tex",
+            OUTPUT_DIR / "table1.tex",
+            OUTPUT_DIR / "table2.tex",
+        ],
         "clean": True,
     }
-<<<<<<< HEAD
-
-##############################################################
-# R Tasks - Uncomment if you have R installed
-##############################################################
-
-
-def task_install_r_packages():
-    """Install R packages"""
-    file_dep = [
-        "r_requirements.txt",
-        "./src/install_packages.R",
-    ]
-    targets = [OUTPUT_DIR / "R_packages_installed.txt"]
-
-    return {
-        "actions": [
-            "Rscript ./src/install_packages.R",
-        ],
-        "targets": targets,
-        "file_dep": file_dep,
-        "clean": True,
-    }
-
-
-def task_example_r_script():
-    """Example R plots"""
-    file_dep = [
-        "./src/example_r_plot.R"
-    ]
-    targets = [
-        OUTPUT_DIR / "example_r_plot.png",
-    ]
-
-    return {
-        "actions": [
-            "Rscript ./src/example_r_plot.R",
-        ],
-        "targets": targets,
-        "file_dep": file_dep,
-        "clean": True,
-    }
-
-
-rmarkdown_tasks = {
-    "04_example_regressions.Rmd": {
-        "file_dep": [],
-        "targets": [],
-    },
-}
-
-
-def task_knit_RMarkdown_files():
-    """Preps the RMarkdown files for presentation format.
-    This will knit the RMarkdown files for easier sharing of results.
-    """
-    str_output_dir = str(OUTPUT_DIR).replace("\\", "/")
-    def knit_string(file):
-        return (
-            "Rscript -e "
-            '"library(rmarkdown); '
-            f"rmarkdown::render('./src/{file}.Rmd', "
-            "output_format='html_document', "
-            f"output_dir='{str_output_dir}')\""
-        )
-
-    for notebook in rmarkdown_tasks.keys():
-        notebook_name = notebook.split(".")[0]
-        file_dep = [f"./src/{notebook}", *rmarkdown_tasks[notebook]["file_dep"]]
-        html_file = f"{notebook_name}.html"
-        targets = [f"{OUTPUT_DIR / html_file}", *rmarkdown_tasks[notebook]["targets"]]
-        actions = [
-            knit_string(notebook_name)
-        ]
-
-        yield {
-            "name": notebook,
-            "actions": actions,
-            "file_dep": file_dep,
-            "targets": targets,
-            "clean": True,
-        }
-=======
->>>>>>> 78ddf03ec1bd176dd908f4be26647081829fc04e
-=======
->>>>>>> f1e88fce90b65662266708504274cac43c79b921
