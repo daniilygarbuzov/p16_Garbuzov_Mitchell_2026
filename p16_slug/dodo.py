@@ -70,7 +70,6 @@ USER = config("USER")
 
 ## Helpers for handling Jupyter Notebook tasks
 environ["PYDEVD_DISABLE_FILE_VALIDATION"] = "1"
-
 # fmt: off
 ## Helper functions for automatic execution of Jupyter notebooks
 def jupyter_execute_notebook(notebook_path):
@@ -125,12 +124,8 @@ def task_config():
         "clean": [],
     }
 
-def task_pull_CFTC():
-    """Pull data from CFTC website"""
-    
-def task_pull_CRB():
-    """Pull data from CRB website"""
 
+<<<<<<< HEAD
 def task_pull_FRED():
     """Pull data from FRED website"""
     return {
@@ -161,24 +156,36 @@ def task_pull():
     yield {
         "name": "crsp_stock",
         "doc": "Pull CRSP stock data from WRDS",
+=======
+def task_pull_WRDS():
+    """Pull futures data from WRDS"""
+    return {
+>>>>>>> f1e88fce90b65662266708504274cac43c79b921
         "actions": [
             "ipython ./src/settings.py",
-            "ipython ./src/pull_CRSP_stock.py",
+            "ipython ./src/pull_wrds_clean.py",
         ],
-        "targets": [DATA_DIR / "CRSP_stock.parquet"],
-        "file_dep": ["./src/settings.py", "./src/pull_CRSP_stock.py"],
+        "targets": [DATA_DIR / "wrds_futures.parquet"],
+        "file_dep": ["./src/settings.py", "./src/pull_wrds_clean.py"],
         "clean": [],
     }
-    yield {
-        "name": "crsp_compustat",
-        "doc": "Pull CRSP Compustat data from WRDS",
+
+
+def task_exploratory_charts():
+    """Generate exploratory charts"""
+    file_dep = [
+        "./src/exploratory_charts.py",
+    ]
+    targets = [
+        OUTPUT_DIR / "treasury_yields.png",
+    ]
+    return {
         "actions": [
-            "ipython ./src/settings.py",
-            "ipython ./src/pull_CRSP_Compustat.py",
+            "ipython ./src/exploratory_charts.py",
         ],
-        "targets": [DATA_DIR / "CRSP_Compustat.parquet"],
-        "file_dep": ["./src/settings.py", "./src/pull_CRSP_compustat.py"],
-        "clean": [],
+        "targets": targets,
+        "file_dep": file_dep,
+        "clean": True,
     }
 
 =======
@@ -226,17 +233,20 @@ def task_summary_stats():
 =======
 >>>>>>> 78ddf03ec1bd176dd908f4be26647081829fc04e
 notebook_tasks = {
-    "01_example_notebook_interactive_ipynb": {
-        "path": "./src/01_example_notebook_interactive_ipynb.py",
+    "example_notebook_interactive_ipynb": {
+        "path": "./src/example_notebook_interactive_ipynb.py",
         "file_dep": [],
         "targets": [],
     },
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 =======
 >>>>>>> 78ddf03ec1bd176dd908f4be26647081829fc04e
+=======
+>>>>>>> f1e88fce90b65662266708504274cac43c79b921
 # fmt: off
 def task_run_notebooks():
     """Preps the notebooks for presentation format.
@@ -283,11 +293,13 @@ def task_compile_latex_docs():
         "./reports/my_common_header.sty",
         "./reports/report_simple_example.tex",
         "./reports/slides_simple_example.tex",
+        "./reports/replication_summary.tex",
         "./src/example_plot.py",
         "./src/example_table.py",
     ]
     targets = [
         "./reports/report_example.pdf",
+        "./reports/replication_summary.pdf",
         "./reports/slides_example.pdf",
         "./reports/report_simple_example.pdf",
         "./reports/slides_simple_example.pdf",
@@ -301,6 +313,8 @@ def task_compile_latex_docs():
             "latexmk -xelatex -halt-on-error -cd ./reports/slides_example.tex",  # Compile
             "latexmk -xelatex -halt-on-error -c -cd ./reports/slides_example.tex",  # Clean
             # Simple templates based on small adjustments to Overleaf templates
+            "latexmk -xelatex -halt-on-error -cd ./reports/replication_summary.tex",  # Compile
+            "latexmk -xelatex -halt-on-error -c -cd ./reports/replication_summary.tex",  # Clean
             "latexmk -xelatex -halt-on-error -cd ./reports/report_simple_example.tex",  # Compile
             "latexmk -xelatex -halt-on-error -c -cd ./reports/report_simple_example.tex",  # Clean
             "latexmk -xelatex -halt-on-error -cd ./reports/slides_simple_example.tex",  # Compile
@@ -310,6 +324,7 @@ def task_compile_latex_docs():
         "file_dep": file_dep,
         "clean": True,
     }
+<<<<<<< HEAD
 
 ##############################################################
 # R Tasks - Uncomment if you have R installed
@@ -393,3 +408,5 @@ def task_knit_RMarkdown_files():
         }
 =======
 >>>>>>> 78ddf03ec1bd176dd908f4be26647081829fc04e
+=======
+>>>>>>> f1e88fce90b65662266708504274cac43c79b921

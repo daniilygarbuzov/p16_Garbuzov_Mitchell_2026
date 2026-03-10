@@ -6,6 +6,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 import matplotlib.pyplot as plt
 import pandas as pd
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 import plotly.tools as tls
 import plotly.graph_objects as go
@@ -13,11 +14,16 @@ import plotly.graph_objects as go
 
 from settings import config
 from pull_FRED import load_fred
+=======
+
+from settings import config
+>>>>>>> f1e88fce90b65662266708504274cac43c79b921
 from pull_WRDS import load_combined_futures_data
 
 OUTPUT_DIR = config("OUTPUT_DIR")
 Path(OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
 
+<<<<<<< HEAD
 # --- Treasury Yields ---
 try:
     df_fred = load_fred()
@@ -44,6 +50,8 @@ except FileNotFoundError:
     print("Skipping treasury yields chart — fred.parquet not found. Run pull_FRED first.")
 
 <<<<<<< HEAD
+=======
+>>>>>>> f1e88fce90b65662266708504274cac43c79b921
 # --- Futures Settlements ---
 try:
     df_futures = load_combined_futures_data()
@@ -60,6 +68,7 @@ try:
     fig.savefig(Path(OUTPUT_DIR) / "futures_settlements.png", dpi=150)
     plt.close(fig)
     print("Futures settlements chart saved.")
+<<<<<<< HEAD
 =======
 # --- Futures Settlements (Compressed) ---
 try:
@@ -102,6 +111,8 @@ try:
     fig.write_image(Path(OUTPUT_DIR) / "futures_settlements.png", width=1200, height=600)
     print("Futures settlements chart saved (compressed).")
 >>>>>>> 78ddf03ec1bd176dd908f4be26647081829fc04e
+=======
+>>>>>>> f1e88fce90b65662266708504274cac43c79b921
 except FileNotFoundError:
     print("Skipping futures chart — wrds_futures.parquet not found. Run pull_WRDS first.")
 
