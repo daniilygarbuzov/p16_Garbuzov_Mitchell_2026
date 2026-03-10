@@ -112,7 +112,7 @@ def compute_returns(wide):
             # sr_4: buy rank-5, sell as rank-4  (needs lp_5 → NaN if unavailable)
             t1_row = grp.iloc[i + 1]
             sr = {}
-            for n in [1, 2, 3, 4]:
+            for n in [1, 2, 3, 4, 5]:
                 lp_n_next = t1_row.get(f"lp_{n}",    np.nan)
                 lp_n1_now = t_row.get(f"lp_{n + 1}", np.nan)
                 sr[n] = (lp_n_next - lp_n1_now
@@ -218,7 +218,7 @@ def build_bimonthly_panel(data_dir=DATA_DIR, output_dir=OUTPUT_DIR,
     df["product_code"] = df["product_code"].astype(int)
 
     # Log prices from price_n1..price_n4
-    for n in [1, 2, 3, 4]:
+    for n in [1, 2, 3, 4, 5]:
         col = f"price_n{n}"
         if col in df.columns:
             df[f"lp_{n}"] = np.log(df[col].clip(lower=1e-6))
