@@ -279,7 +279,7 @@ def _save_latex(df_sr, df_eh, output_dir):
                     vals.append(f"{v:.2%}")
         lines.append(f"{display} & " + " & ".join(vals) + r" \\")
 
-    lines += [r"\midrule", r"\textit{Excess Holding} \\"]
+    lines += [r"\addlinespace", r"\textit{Excess Holding} \\"]
 
     for sector_key in SECTOR_ORDER:
         if sector_key not in df_eh.index:
