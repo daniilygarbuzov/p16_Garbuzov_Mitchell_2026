@@ -11,9 +11,7 @@ conda activate blank
 and then install the dependencies with pip
 
 pip install -r requirements.txt
-Finally, you can then run
-
-doit
+Finally, copy .env.example to .env, add your WRDS username, then run doit
 
 And that's it!
 
