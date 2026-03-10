@@ -37,7 +37,7 @@ def compute_short_roll_returns(df: pl.DataFrame) -> pl.DataFrame:
 
 def compute_excess_holding_spread(df_sr: pl.DataFrame) -> pl.DataFrame:
     """
-    Excess Holding as requested:
+    Excess Holding:
 
     For n = x >= 2:
         ret_eh_t(x) = (F_t^x - F_t^1) / F_t^1,
