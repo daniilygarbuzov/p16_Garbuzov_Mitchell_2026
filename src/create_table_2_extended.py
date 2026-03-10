@@ -351,10 +351,58 @@ def format_table_2(table_dict, output_dir=OUTPUT_DIR):
 
 
 def _save_table2_latex_extended(table_dict, output_dir):
+    """Save Table 2 Extended as a LaTeX table, fixed alignment for P4-P1 row."""
     lines = [
         r"\begin{center}",
         r"\captionof{table}{Sorts Based on the Basis}",
-        r"\label{tab:table1}",
+        r"\label{tab:table2_extended}",
+        r"\footnotesize",
+        r"\textbf{Panel A: Short Roll Returns} \\",
+        r"\begin{tabular}{l" + "rr" * 4 + "}",
+        r"\toprule",
+        (r" & \multicolumn{2}{c}{$n=1$} & \multicolumn{2}{c}{$n=2$} "
+         r"& \multicolumn{2}{c}{$n=3$} & \multicolumn{2}{c}{$n=4$} \\"),
+        r" & Mean & Std & Mean & Std & Mean & Std & Mean & Std \\",
+        r"\midrule",
+    ]
+
+    labels = {"P1": "Low", "P2": "P2", "P3": "P3",
+              "P4": "High", "P4_minus_P1": r"$P_4 - P_1$"}
+    df = table_dict["panel_a_sr"]
+
+    # --- Portfolio rows ---
+    for pkey, plabel in labels.items():
+        if pkey not in df.index or pkey == "P4_minus_P1":
+            continue
+        row = df.loc[pkey]
+        vals = []
+        for n in [1, 2, 3, 4]:
+            mean = row.get(f"mean_n{n}", np.nan)
+            std  = row.get(f"std_n{n}", np.nan)
+            vals.append(f"{mean:.2%}" if not np.isnan(mean) else r"\phantom{0.00\%}")
+            vals.append(f"{std:.2%}"  if not np.isnan(std)  else r"\phantom{0.00\%}")
+        lines.append(plabel + " & " + " & ".join(vals) + r" \\")
+
+    # --- P4-P1 spread row ---
+    if "P4_minus_P1" in df.index:
+        spread = df.loc["P4_minus_P1"]
+        interleaved = []
+        for n in [1, 2, 3, 4]:
+            mean  = spread.get(f"mean_n{n}", np.nan)
+            tstat = spread.get(f"t_n{n}", np.nan)
+            interleaved.append(f"{mean:.2%}" if not np.isnan(mean) else r"\phantom{0.00\%}")
+            interleaved.append(f"({tstat:0.2f})" if not np.isnan(tstat) else r"\phantom{(0.00)}")
+        lines.append(r"$t(P_4-P_1)$ & " + " & ".join(interleaved) + r" \\")
+
+    lines += [r"\bottomrule", r"\end{tabular}", r"\end{center}"]
+
+    latex_path = Path(output_dir) / "table2_extended.tex"
+    latex_path.write_text("\n".join(lines))
+    print(f"LaTeX saved → {latex_path}")
+    lines = [
+        r"\begin{center}",
+        r"\captionof{table}{Sorts Based on the Basis}",
+        r"\label{tab:table2_extended}",
         r"\footnotesize",
         r"\textbf{Panel A: Short Roll Returns} \\",
         r"\begin{tabular}{l" + "rr" * 4 + "}",
@@ -390,7 +438,7 @@ def _save_table2_latex_extended(table_dict, output_dir):
         for t in tstats:
             interleaved.extend([t, ""])
         lines.append(r"$t(P_4-P_1)$ & " +
-                     " & ".join(interleaved).rstrip(" & ") + r" \\")
+                     " & ".join(interleaved) + r" \\")
 
     lines += [r"\bottomrule", r"\end{tabular}", r"\end{center}"]
 

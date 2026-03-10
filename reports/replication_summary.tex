@@ -1,286 +1,126 @@
 \documentclass[11pt]{article}
 
-\usepackage[margin=1in]{geometry}
-\usepackage{booktabs}
-\usepackage{graphicx}
-\usepackage{caption}
-\usepackage{amsmath}
+% --------------------------------------------------
+% Packages
+% --------------------------------------------------
+\usepackage{booktabs}   % for \toprule, \midrule, \bottomrule
+\usepackage{caption}    % for \captionof
+\usepackage{geometry}
 \usepackage{setspace}
-\usepackage{hyperref}
-\usepackage{adjustbox}
-\usepackage{caption}
-\usepackage{adjustbox}
-\usepackage{etoolbox}
+\usepackage{amsmath}    % for equations
+\usepackage{graphicx}
 
-% Automatically scale all tables to page width
-\AtBeginEnvironment{tabular}{\begin{adjustbox}{max width=\textwidth}}
-\AtEndEnvironment{tabular}{\end{adjustbox}}
+\geometry{margin=1in}
+\setstretch{1.1}
 
-\onehalfspacing
-
-\title{Replication of Szymanowska et al.~(2014)\\
-Short- and Long-Horizon Commodity Futures Premia}
-\author{Daniil Garbuzov and Mitchell}
+% --------------------------------------------------
+% Title
+% --------------------------------------------------
+\title{Replication Summary\\
+\large Szymanowska et al. (2014)}
+\author{Garbuzov and Mitchell}
 \date{\today}
 
+% --------------------------------------------------
+% Document
+% --------------------------------------------------
 \begin{document}
+
 \maketitle
 
-\section{Overview of the Replication Project}
+\section{Data Construction and Descriptives}
 
-This document summarizes our replication of Szymanowska et al.~(2014), who
-study short- and long-horizon premia in commodity futures.
-All statistics, tables, and figures shown here are generated directly by 
-Python code from WRDS data and saved as LaTeX files or images that we
-input into this report.
+In this paper, we replicate Tables I and II from Szymanowska et al. (2014), which deconstruct the spot and term premia for various commodity sectors.
 
-Our goals were to (i) reconstruct the main tables in the paper (Tables~1 and
-2), (ii) extend the sample through 2026, and (iii) provide additional summary
-statistics and data snapshots that clarify the structure of the underlying
-futures panel.
+\subsection{Commodity Panel Sample (Head)}
 
-\section{Data Sources and Construction}
+Below is the head of the cleaned commodity panel used in our analysis. 
+In the paper, contracts are extracted at 2 month intervals, which equate to an interval of n = 1. The original paper then takes the closest 2 month contract to be the spot price. 
+Note, we chose to extract values on the last day of every other month, as the date of extraction was not specified by the paper. Beyond that, the specific commodities codes to use were not specified.
 
-\subsection*{Data sources}
+\begin{center}
+\resizebox{0.9\textwidth}{!}{%
+  \input{../_output/commodity_panel_head.tex}%
+}
+\end{center}
 
-We rely on Thomson Reuters Datastream data obtained via WRDS:
-\begin{itemize}
-  \item \textbf{TR\_DS\_FUT}: daily futures settlement prices and contract
-        information (symbol, contract code, maturity date).
-  \item \textbf{TR\_DS\_COMDS}: continuous/spot commodity indices used for
-        context and sanity checks.
-\end{itemize}
+\subsection{Sector Classification List}
 
-From TR\_DS\_FUT we pull all available futures contracts for the commodities
-and map each contract to a sector. Note that the way the paper initially constructed their commodites has been discontinued so we used WRDS instead.
-The main sectors are Energy, Meats, Metals, Grains, Oilseeds, Softs, and
-Industrial Materials, and we also construct an equally-weighted ``All''
-portfolio across all commodities.
+For this paper, seven commodities sectors are discussed. Those are Energy, Grains, Industrial Materials, Meats, Metals, Oilseeds, and Softs.
 
-\subsection*{Bimonthly panel and portfolio construction}
 
-We convert the daily futures data into a bimonthly panel.
-This involves:
-\begin{itemize}
-  \item Defining a grid of six observation dates per year (every two months).
-  \item On each date, identifying available contracts at different times to
-        maturity and computing corresponding futures prices.
-  \item Forming equal-weighted sector portfolios by averaging log returns
-        across commodities within each sector.
-\end{itemize}
 
-The resulting bimonthly panel is stored as \texttt{commodity\_panel.parquet}
-and serves as the input for constructing Short Roll (SR) and Excess Holding
-(EH) returns, which are saved in \texttt{returns\_panel.parquet}.
+\section{Return Construction}
 
-\section{Understanding the Underlying Data}
+Returns are computed from bimonthly futures prices at different
+maturities. We follow the paper’s notation and define Short Roll and
+Excess Holding returns as functions of log futures prices.
 
-To give the reader a concrete sense of the data we work with, we first show a
-small excerpt of the commodity panel and then provide sector-level summary
-statistics and lists of commodities and sectors.
-All of these tables are generated by Python and exported as LaTeX{}
-snippets.
+\subsection{Short Roll Returns}
 
-\subsection*{Head of the commodity panel}
+Let \(F_{t,n}\) denote the futures price at date \(t\) with \(n\)
+bimonthly periods to maturity, and let \(f_{t,n} = \ln F_{t,n}\) be its
+log price. The Short Roll (SR) return over one bimonthly period for
+maturity \(n\) is
 
-The first table below displays the first few rows of the bimonthly commodity
-panel.
-This table is created by taking the head of
-\texttt{commodity\_panel.parquet} and converting it to LaTeX.
-
-\begin{table}[h]
-  \centering
-  \caption{Head of the bimonthly commodity panel.
-  The table shows a few rows of the panel used to construct SR and EH returns,
-  including observation dates, commodity identifiers, sectors, and prices at
-  several maturities.}
-  \label{tab:panelhead}
-  \resizebox{\textwidth}{!}{%
-    \input{../_output/commodity_panel_head.tex}
-  }
-\end{table}
-
-\subsection*{List of sectors and commodities}
-
-The following tables report the distinct sectors present in the panel and
-list the individual commodities and their sector assignments.
-Both are generated directly from the underlying panel by grouping and
-exporting to \LaTeX.
-
-\begin{table}[h]
-  \centering
-  \caption{List of sectors in the commodity panel.
-  This table summarizes the sector classification used throughout the
-  replication (Energy, Meats, Metals, Grains, Oilseeds, Softs, Industrial
-  Materials, and an equally-weighted ``All'' portfolio).}
-  \label{tab:sectors}
-  \input{../_output/sectors_list.tex}
-\end{table}
-
-\begin{table}[h]
-  \centering
-  \caption{List of commodities and their sectors.
-  The table maps each individual commodity in the panel to a sector, which is
-  the basis for the sector-level equal-weighted portfolios used in all
-  subsequent analysis.}
-  \label{tab:commodities}
-  \input{../_output/commodities_list.tex}
-\end{table}
-
-\subsection*{Summary statistics for SR returns}
-
-We next present sector-level summary statistics for the bimonthly Short Roll
-return \(sr_1\) (one-period SR).
-These statistics are computed from \texttt{returns\_panel.parquet} and
-exported to \texttt{summary\_stats.tex}.
-
-\begin{table}[h]
-  \centering
-  \caption{Summary statistics for bimonthly \(sr_1\) returns by sector.
-  For each sector, we report the mean, standard deviation, range, skewness,
-  and kurtosis of the \(sr_1\) series.}
-  \label{tab:summary}
-  \input{../_output/summary_stats.tex}
-\end{table}
-
-\section{Short Roll and Excess Holding: Formulas}
-
-Let \(S_t\) denote the spot price at time \(t\) and \(F_t^{(n)}\) the
-futures price at time \(t\) for a contract maturing \(n\) bimonthly periods
-ahead.
-We observe data at bimonthly dates \(t = 0,1,2,\dots\) (six per year).
-
-\subsection*{Short Roll (SR) returns}
-
-For a given horizon \(n\) (in bimonthly periods), the SR strategy rolls
-futures contracts to maintain a constant time to maturity \(n\).
-The bimonthly log SR return from \(t\) to \(t+1\) at horizon \(n\) is
 \[
-  r^{\text{SR},n}_{t \to t+1}
-  = \ln F_{t+1}^{(n)} - \ln F_t^{(n)}.
-\]
-In the data, we denote these returns by \(sr_n\) for \(n = 1,2,3,4\).
-For each sector, we average \(sr_n\) across commodities and then compute
-annualized moments:
-\[
-  \mu_{\text{ann}}^{\text{SR},n}
-  = \mu_{\text{raw}}^{\text{SR},n} \times 6, \quad
-  \sigma_{\text{ann}}^{\text{SR},n}
-  = \sigma_{\text{raw}}^{\text{SR},n} \times \sqrt{6},
-\]
-where \(\mu_{\text{raw}}^{\text{SR},n}\) and \(\sigma_{\text{raw}}^{\text{SR},n}\)
-are the mean and standard deviation of the bimonthly SR returns \(sr_n\).
-
-\subsection*{Excess Holding (EH) returns}
-
-The EH strategy compares holding a contract to maturity to rolling at a
-constant horizon.
-For a maturity of \(n\) bimonthly periods, the log EH return over \(n\)
-periods is
-\[
-  r^{\text{EH},n}_{t \to t+n}
-  = r^{\text{Hold},n}_{t \to t+n}
-    - r^{\text{SR},n}_{t \to t+n},
-\]
-where \(r^{\text{Hold},n}_{t \to t+n}\) is the return from buying an
-\(n\)-maturity contract at \(t\) and holding it to \(t+n\), and
-\(r^{\text{SR},n}_{t \to t+n}\) is the cumulative SR return over the same
-horizon.
-In the data, we denote these by \(eh_n\) for \(n = 2,3,4\).
-
-Because EH returns span \(n\) bimonthly periods, we annualize their moments
-using
-\[
-  \mu_{\text{ann}}^{\text{EH},n}
-  = \mu_{\text{raw}}^{\text{EH},n} \times \frac{6}{n}, \quad
-  \sigma_{\text{ann}}^{\text{EH},n}
-  = \sigma_{\text{raw}}^{\text{EH},n} \times \sqrt{\frac{6}{n}}.
+r^{SR}_{t+1,n}
+  = f_{t+1,n} - f_{t,n+1}.
 \]
 
-\subsection*{Newey--West \(t\)-statistics}
+When \(n=1\), this represents rolling from the near contract into the
+next contract while keeping maturity approximately constant. Note that the roll over date is implied to be 4 to 6 weeks earlier than traditional rolling over to deal with liquidity issues.
 
-To compute \(t\)-statistics for the mean returns, we run a simple regression
+\subsection{Excess Holding Returns}
+
+The Excess Holding (EH) return over \(n\) bimonthly periods is defined
+as the \(n\)-period futures return in excess of the corresponding
+short-roll strategy. Denote the \(n\)-period log futures return by
+
 \[
-  r_t = \alpha + \varepsilon_t,
-\]
-where \(r_t\) is the bimonthly SR or EH return.
-We then estimate \(\hat{\alpha}\) and its Newey--West robust standard error
-\(\text{SE}_{\text{NW}}(\hat{\alpha})\) using a lag length that accounts for
-overlapping returns (at least \(n-1\) for EH) and a rule-of-thumb based on
-the sample size.
-The reported \(t\)-statistic is
-\[
-  t_{\text{NW}} = \frac{\hat{\alpha}}{\text{SE}_{\text{NW}}(\hat{\alpha})}.
+r^{F}_{t \rightarrow t+n}
+  = f_{t+n,n} - f_{t,n+n}.
 \]
 
-\section{Challenges, Successes, and Takeaways}
+Then the Excess Holding return for horizon \(n\) is
 
-\subsection*{Successes}
+\[
+r^{EH}_{t \rightarrow t+n}
+  = r^{F}_{t \rightarrow t+n}
+    - \sum_{j=0}^{n-1} r^{SR}_{t+j,1}.
+\]
 
-We view the replication as partially successful:
-\begin{itemize}
-  \item We built a transparent, fully reproducible pipeline from WRDS data to
-        bimonthly sector and portfolio returns, SR and EH decompositions, and
-        \LaTeX{} tables.
-  \item We reproduced the overall structure and many of the qualitative
-        findings of Tables~1 and~2 and extended both tables to 2026.
-  \item We added summary statistics and data snapshots (panel head, commodity
-        and sector lists) that make the empirical setting more interpretable.
-\end{itemize}
+By construction, EH isolates the payoff to holding the futures position
+to maturity relative to rolling short at the front of the curve. This method allows us to break apart a futures contract into the spot and term premia components.
 
-\subsection*{Challenges}
+\section{Summary Statistics Tables}
 
-The main obstacles were:
-\begin{itemize}
-  \item \textbf{Ambiguous implementation details}: the paper does not fully
-        specify every aspect of contract filtering, roll timing, or treatment
-        of missing prices, forcing us to make reasonable but unverified
-        choices.
-  \item \textbf{Data version differences}: our TR\_DS\_FUT and TR\_DS\_COMDS
-        extracts may differ from those originally used, due to vendor
-        revisions or historical changes in WRDS.
-  \item \textbf{Sensitivity of portfolio regressions}: the portfolio-sorted
-        results in Table~2 proved especially sensitive to small changes in
-        implementation, making an exact match very difficult.
-\end{itemize}
+Breaking apart futures contracts by shorting the closest contract and longing the further away contract, we calculcate the term premia associated with that contract. From our dataset (March 1986--December 2010), we then compute annualized mean returns, standard deviations, and t-statistics for Short Roll and Excess Holding returns across commodity sectors, replicating the main results of the paper.
+Our findings are quite different from the original paper, which is likely due to differences in data sources and return construction details that were not fully specified in the original paper.
 
-\subsection*{What we learned}
+\subsection{Main Table 1}
 
-Overall, the project highlights the importance of:
-\begin{itemize}
-  \item Building robust, well-documented data pipelines for empirical asset
-        pricing work.
-  \item Stress-testing published results with extended samples and additional
-        diagnostic tables and figures.
-  \item Recognizing that even carefully executed replications may not produce
-        identical numbers when key data and implementation details are not
-        fully disclosed.
-\end{itemize}
+Table~\ref{tab:table1} reports annualized mean returns, standard
+deviations, and Newey--West \(t\)-statistics for Short Roll and Excess
+Holding returns across commodity sectors.
 
-
-\clearpage
-\appendix
-\section*{Appendix A: Main Tables}
-
-\begin{adjustbox}{max width=\textwidth}
 \input{../_output/table1.tex}
-\end{adjustbox}
 
-\clearpage
+\newpage
+\subsection{Extended Table 1}
 
-\begin{adjustbox}{max width=\textwidth}
+The extended version of Table~1 below uses the extended
+sample up until the present-day and applies the same return definitions and sector groupings.
+
 \input{../_output/table1_extended.tex}
-\end{adjustbox}
 
-\clearpage
+\subsection{Additional Summary Statistics}
 
-\begin{adjustbox}{max width=\textwidth}
-\input{../_output/table2.tex}
-\end{adjustbox}
+This table reports additional summary statistics for the commodity
+panel, beyond those in Table~1. We compute statistics across the same length as the paper, March 1986--December 2010.
+The mean basis indicates to us whether a sector is on average in backwardation or contango. Energy and metals exhibit near-zero or negative mean basis, 
+while meats and grains are predominantly in contango. Note the std, minimum and maximum basis values as well, which indicate a high level of volatility in many commodities. Skew and kurtosis further help us understand the general shape of these returns.
 
-\clearpage
+\input{../_output/summary_stats.tex}
 
-\begin{adjustbox}{max width=\textwidth}
-\input{../_output/table2_extended.tex}
-\end{adjustbox}
 \end{document}

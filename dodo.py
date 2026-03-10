@@ -312,8 +312,7 @@ def task_compile_latex_docs():
     """Compile replication_summary.tex to PDF."""
     return {
         "actions": [
-            "cd reports && latexmk -xelatex -halt-on-error -interaction=nonstopmode -f replication_summary.tex",
-            "cd reports && latexmk -xelatex -halt-on-error -c replication_summary.tex",
+            "cd reports && latexmk -xelatex -gg -halt-on-error -interaction=nonstopmode replication_summary.tex"
         ],
         "targets": ["reports/replication_summary.pdf"],
         "file_dep": [

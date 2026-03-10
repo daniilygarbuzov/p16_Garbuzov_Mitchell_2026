@@ -242,72 +242,111 @@ def _print_panel(df, maturities):
             parts.append(f"{ms} {ss} {ts}")
         print(f"{display:<18}  {'  '.join(parts)}")
 
-
 def _save_latex(df_sr, df_eh, output_dir):
-    """Save Table 1 as LaTeX."""
+    """
+    Save Table 1 as LaTeX, with 3 blocks (Mean, Std Dev, t-stat),
+    each block having 4 n-columns (n=1..4) and 8 sector rows.
+
+    For Excess Holding, the n=1 entries are shown as blanks (phantom)
+    while n=2..4 are filled.
+    """
+    SECTOR_ORDER = ["Energy", "Meats", "Metals", "Grains",
+                    "Oilseeds", "Softs", "Ind_Materials", "EW_All"]
+
+    def _escape_latex(text: str) -> str:
+        return str(text).replace("_", r"\_")
+
+    def _fmt_value(v, kind: str) -> str:
+        # kind in {"mean","std","t"}. Currently prints decimals (not %).
+        if pd.isna(v):
+            return r"\phantom{0.000}"
+        return f"{v:.3f}"
+
     lines = [
         r"\begin{center}",
         r"\captionof{table}{Summary Statistics}",
         r"\label{tab:table1}",
         r"\footnotesize",
+        # 1 label column + 12 numeric columns
         r"\begin{tabular}{l" + "r" * 12 + "}",
         r"\toprule",
-        (r" & \multicolumn{4}{c}{Mean} & \multicolumn{4}{c}{Std Dev} "
-         r"& \multicolumn{4}{c}{$t$-stat} \\"),
-        (r" & $n=1$ & $n=2$ & $n=3$ & $n=4$ "
-         r"& $n=1$ & $n=2$ & $n=3$ & $n=4$ "
-         r"& $n=1$ & $n=2$ & $n=3$ & $n=4$ \\"),
+        # Top header: 3 blocks, each 4 n-columns
+        r" & \multicolumn{4}{c}{Annualized Mean Returns} "
+        r"& \multicolumn{4}{c}{Annualized Standard Deviations} "
+        r"& \multicolumn{4}{c}{$t$-Statistics} \\",
+        r" & $n=1$ & $n=2$ & $n=3$ & $n=4$ "
+        r"& $n=1$ & $n=2$ & $n=3$ & $n=4$ "
+        r"& $n=1$ & $n=2$ & $n=3$ & $n=4$ \\",
         r"\midrule",
         r"\textit{Short Roll} \\",
     ]
 
-    for sector_key in SECTOR_ORDER:
-        if sector_key not in df_sr.index:
+    # -------- Panel A: Short Roll --------
+    for sector in SECTOR_ORDER:
+        if sector not in df_sr.index:
             continue
-        display = SECTOR_DISPLAY_NAMES.get(sector_key, sector_key)
-        row     = df_sr.loc[sector_key]
-        vals    = []
-        for stat in ["mean_ann", "std_ann", "t_stat"]:
-            for n in [1, 2, 3, 4]:
-                v = row.get(f"{stat}_n{n}", np.nan)
-                if np.isnan(v):
-                    vals.append("—")
-                elif stat == "t_stat":
-                    vals.append(f"({v:.2f})")
-                else:
-                    vals.append(f"{v:.2%}")
-        lines.append(f"{display} & " + " & ".join(vals) + r" \\")
+        row = df_sr.loc[sector]
+        vals = []
 
-    lines += [r"\addlinespace", r"\textit{Excess Holding} \\"]
+        # Block 1: means (n=1..4)
+        for n in [1, 2, 3, 4]:
+            mean = row.get(f"mean_ann_n{n}", float("nan"))
+            vals.append(_fmt_value(mean, "mean"))
 
-    for sector_key in SECTOR_ORDER:
-        if sector_key not in df_eh.index:
+        # Block 2: std devs (n=1..4)
+        for n in [1, 2, 3, 4]:
+            std = row.get(f"std_ann_n{n}", float("nan"))
+            vals.append(_fmt_value(std, "std"))
+
+        # Block 3: t-stats (n=1..4)
+        for n in [1, 2, 3, 4]:
+            t = row.get(f"t_stat_n{n}", float("nan"))
+            vals.append(_fmt_value(t, "t"))
+
+        lines.append(
+            f"{_escape_latex(SECTOR_DISPLAY_NAMES.get(sector, sector))} & "
+            + " & ".join(vals) + r" \\"
+        )
+
+    # -------- Panel B: Excess Holding --------
+    lines += [r"\midrule", r"\textit{Excess Holding} \\"]
+
+    for sector in SECTOR_ORDER:
+        if sector not in df_eh.index:
             continue
-        display    = SECTOR_DISPLAY_NAMES.get(sector_key, sector_key)
-        row        = df_eh.loc[sector_key]
-        vals_mean, vals_std, vals_t = [], [], []
+        row = df_eh.loc[sector]
+        vals = []
+
+        # Block 1: means
+        # n=1 blank (phantom), n=2..4 from EH
+        vals.append(r"\phantom{0.000}")
         for n in [2, 3, 4]:
-            for stat, lst in [("mean_ann", vals_mean),
-                               ("std_ann",  vals_std),
-                               ("t_stat",   vals_t)]:
-                v = row.get(f"{stat}_n{n}", np.nan)
-                if np.isnan(v):
-                    lst.append("—")
-                elif stat == "t_stat":
-                    lst.append(f"({v:.2f})")
-                else:
-                    lst.append(f"{v:.2%}")
-        # n=1 blank for EH
-        vals = (["—"] + vals_mean + ["—"] + vals_std + ["—"] + vals_t)
-        lines.append(f"{display} & " + " & ".join(vals) + r" \\")
+            mean = row.get(f"mean_ann_n{n}", float("nan"))
+            vals.append(_fmt_value(mean, "mean"))
+
+        # Block 2: std devs
+        vals.append(r"\phantom{0.000}")
+        for n in [2, 3, 4]:
+            std = row.get(f"std_ann_n{n}", float("nan"))
+            vals.append(_fmt_value(std, "std"))
+
+        # Block 3: t-stats
+        vals.append(r"\phantom{0.000}")
+        for n in [2, 3, 4]:
+            t = row.get(f"t_stat_n{n}", float("nan"))
+            vals.append(_fmt_value(t, "t"))
+
+        lines.append(
+            f"{_escape_latex(SECTOR_DISPLAY_NAMES.get(sector, sector))} & "
+            + " & ".join(vals) + r" \\"
+        )
 
     lines += [r"\bottomrule", r"\end{tabular}", r"\end{center}"]
 
     latex_path = output_dir / "table1.tex"
     latex_path.write_text("\n".join(lines))
     print(f"LaTeX saved → {latex_path}")
-
-
+   
 def format_table_1(table_dict, output_dir=OUTPUT_DIR):
     """Print to console and save CSV + LaTeX."""
     output_dir = Path(output_dir)
