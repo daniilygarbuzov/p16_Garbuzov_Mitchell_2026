@@ -352,10 +352,9 @@ def format_table_2(table_dict, output_dir=OUTPUT_DIR):
 
 def _save_table2_latex_extended(table_dict, output_dir):
     lines = [
-        r"\begin{table}[htbp]",
-        r"\centering",
-        r"\caption{Sorts Based on the Basis}",
-        r"\label{tab:table2_extended}",
+        r"\begin{center}",
+        r"\captionof{table}{Sorts Based on the Basis}",
+        r"\label{tab:table1}",
         r"\footnotesize",
         r"\textbf{Panel A: Short Roll Returns} \\",
         r"\begin{tabular}{l" + "rr" * 4 + "}",
@@ -393,7 +392,7 @@ def _save_table2_latex_extended(table_dict, output_dir):
         lines.append(r"$t(P_4-P_1)$ & " +
                      " & ".join(interleaved).rstrip(" & ") + r" \\")
 
-    lines += [r"\bottomrule", r"\end{tabular}", ""]
+    lines += [r"\bottomrule", r"\end{tabular}", r"\end{center}"]
 
     latex_path = output_dir / "table2_extended.tex"
     latex_path.write_text("\n".join(lines))

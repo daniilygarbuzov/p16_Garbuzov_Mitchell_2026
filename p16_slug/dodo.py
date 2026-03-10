@@ -290,19 +290,43 @@ def task_run_notebooks():
 ##################################
 ## LaTeX compilation
 ##################################
+def task_make_summary_stats():
+    """Generate LaTeX snippets from panels and returns."""
+    return {
+        "actions": ["ipython ./src/make_summary_stats.py"],
+        "file_dep": [
+            "./src/make_summary_stats.py",
+            DATA_DIR / "returns_panel.parquet",
+            DATA_DIR / "commodity_panel.parquet",
+        ],
+        "targets": [
+            OUTPUT_DIR / "summary_stats.tex",
+            OUTPUT_DIR / "commodity_panel_head.tex",
+            OUTPUT_DIR / "sectors_list.tex",
+            OUTPUT_DIR / "commodities_list.tex",
+        ],
+        "clean": True,
+    }
 
 def task_compile_latex_docs():
     """Compile replication_summary.tex to PDF."""
     return {
         "actions": [
-            "latexmk -xelatex -halt-on-error -cd ./reports/replication_summary.tex",
-            "latexmk -xelatex -halt-on-error -c  -cd ./reports/replication_summary.tex",
+            "cd reports && latexmk -xelatex -halt-on-error -interaction=nonstopmode -f replication_summary.tex",
+            "cd reports && latexmk -xelatex -halt-on-error -c replication_summary.tex",
         ],
-        "targets": ["./reports/replication_summary.pdf"],
+        "targets": ["reports/replication_summary.pdf"],
         "file_dep": [
-            "./reports/replication_summary.tex",
+            "reports/replication_summary.tex",
+            OUTPUT_DIR / "summary_stats.tex",
+            OUTPUT_DIR / "commodity_panel_head.tex",
+            OUTPUT_DIR / "sectors_list.tex",
+            OUTPUT_DIR / "commodities_list.tex",
             OUTPUT_DIR / "table1.tex",
+            OUTPUT_DIR / "table1_extended.tex",
             OUTPUT_DIR / "table2.tex",
+            OUTPUT_DIR / "table2_extended.tex",
         ],
         "clean": True,
     }
+

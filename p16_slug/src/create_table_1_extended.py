@@ -246,10 +246,9 @@ def _print_panel(df, maturities):
 def _save_latex(df_sr, df_eh, output_dir):
     """Save Table 1 as LaTeX."""
     lines = [
-        r"\begin{table}[htbp]",
-        r"\centering",
-        r"\caption{Summary Statistics}",
-        r"\label{tab:table1_extended}",
+        r"\begin{center}",
+        r"\captionof{table}{Summary Statistics}",
+        r"\label{tab:table1}",
         r"\footnotesize",
         r"\begin{tabular}{l" + "r" * 12 + "}",
         r"\toprule",
@@ -302,7 +301,7 @@ def _save_latex(df_sr, df_eh, output_dir):
         vals = (["—"] + vals_mean + ["—"] + vals_std + ["—"] + vals_t)
         lines.append(f"{display} & " + " & ".join(vals) + r" \\")
 
-    lines += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
+    lines += [r"\bottomrule", r"\end{tabular}", r"\end{center}"]
 
     latex_path = output_dir / "table1_extended.tex"
     latex_path.write_text("\n".join(lines))

@@ -106,10 +106,17 @@ def fetch_wrds_fut_contract(futcodes_contrdates):
         Columns include: futcode, date_, settlement, and a 'contrdate' column mapped from futcodes_contrdates.
     """
     db = wrds.Connection(wrds_username=WRDS_USERNAME)
+    #this section is included to prevent an issue with np.float ints being saved as floats in the SQL query
+    futcodes = [int(x) for x in futcodes_contrdates.keys()]
+    if len(futcodes) == 1:
+        in_clause = f"({futcodes[0]})"
+    else:
+        in_clause = str(tuple(futcodes))
+
     query = f"""
     SELECT futcode, date_, settlement
     FROM tr_ds_fut.wrds_fut_contract
-    WHERE futcode IN {tuple(futcodes_contrdates.keys())}
+    WHERE futcode IN {in_clause}
     """
     df = db.raw_sql(query)
     df["date_"] = pd.to_datetime(df["date_"])
