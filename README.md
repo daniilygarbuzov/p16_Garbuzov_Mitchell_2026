@@ -3,7 +3,7 @@ Final Project repo for FINM 32900 Full Stack Quantitative Finance creating an op
 
 Quick Start
 
-To quickest way to run code in this repo is to use the following steps. First, you must have the conda
+The quickest way to run code in this repo is to use the following steps. First, you must have the conda
 package manager installed (e.g., via Anaconda). However, I recommend using mamba, via [miniforge] (https://github.com/conda-forge/miniforge) as it is faster and more lightweight than conda. Second, you must have TexLive (or another LaTeX distribution) installed on your computer and available in your path. You can do this by downloading and installing it from here (windows and mac installers). Having done these things, open a terminal and navigate to the root directory of the project and create a conda environment using the following command:
 
 conda create -n blank python=3.12
