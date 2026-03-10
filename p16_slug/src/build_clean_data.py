@@ -2,7 +2,7 @@
 build_clean_data.py
 -------------------
 Produces a clean flat file with columns:
-    date, commodity, sector, price_n1, price_n2, price_n3, price_n4
+    date, commodity, sector, price_n1, price_n2, price_n3, price_n4, price_n5
 
 One row per (bimonthly date, commodity).
 """
@@ -126,6 +126,7 @@ def build_clean_panel():
                 "price_n2" : sub.iloc[1]["settlement"] if len(sub) > 1 else np.nan,
                 "price_n3" : sub.iloc[2]["settlement"] if len(sub) > 2 else np.nan,
                 "price_n4" : sub.iloc[3]["settlement"] if len(sub) > 3 else np.nan,
+                "price_n5" : sub.iloc[4]["settlement"] if len(sub) > 4 else np.nan,
             }
             records.append(row)
     
