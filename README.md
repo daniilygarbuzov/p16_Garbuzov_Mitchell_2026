@@ -17,6 +17,3 @@ doit
 
 And that's it!
 
-If you would also like to run the R code included in this project, you can either install R and the required packages manually, or you can use the included environment.yml file. To do this, run
-
-mamba env create -f environment.yml
