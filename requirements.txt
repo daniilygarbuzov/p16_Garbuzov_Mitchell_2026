@@ -47,5 +47,7 @@ chartbook[all]
 wrds>=3.2.0
 jaydebeapi
 
-
+#used for some number calculcations
+statsmodels>=0.14.4
+Jinja2>=3.1.2
 
