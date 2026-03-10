@@ -229,11 +229,13 @@ def task_compile_latex_docs():
         "./reports/my_common_header.sty",
         "./reports/report_simple_example.tex",
         "./reports/slides_simple_example.tex",
+        "./reports/replication_summary.tex",
         "./src/example_plot.py",
         "./src/example_table.py",
     ]
     targets = [
         "./reports/report_example.pdf",
+        "./reports/replication_summary.pdf",
         "./reports/slides_example.pdf",
         "./reports/report_simple_example.pdf",
         "./reports/slides_simple_example.pdf",
@@ -247,6 +249,8 @@ def task_compile_latex_docs():
             "latexmk -xelatex -halt-on-error -cd ./reports/slides_example.tex",  # Compile
             "latexmk -xelatex -halt-on-error -c -cd ./reports/slides_example.tex",  # Clean
             # Simple templates based on small adjustments to Overleaf templates
+            "latexmk -xelatex -halt-on-error -cd ./reports/replication_summary.tex",  # Compile
+            "latexmk -xelatex -halt-on-error -c -cd ./reports/replication_summary.tex",  # Clean
             "latexmk -xelatex -halt-on-error -cd ./reports/report_simple_example.tex",  # Compile
             "latexmk -xelatex -halt-on-error -c -cd ./reports/report_simple_example.tex",  # Clean
             "latexmk -xelatex -halt-on-error -cd ./reports/slides_simple_example.tex",  # Compile

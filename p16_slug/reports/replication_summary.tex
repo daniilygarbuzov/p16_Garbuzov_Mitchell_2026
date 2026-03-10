@@ -1,0 +1,153 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath, amssymb}
+\usepackage{booktabs}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{hyperref}
+
+\geometry{margin=1in}
+\onehalfspacing
+
+\begin{document}
+
+\title{Replication Summary: Szymanowska et al.\ (2014)}
+\author{Garbuzov, Mitchell}
+\date{\today}
+\maketitle
+
+\section{Overview}
+
+This document summarizes the replication of the main summary statistics for
+commodity futures returns in Szymanowska et al.\ (2014). The focus is on
+Table~1--style results: annualized mean returns, standard deviations, and
+Newey--West $t$-statistics for Short Roll (SR) and Excess Holding (EH) returns
+across commodity sectors.
+
+% NOTE TO SELF:
+% If you later replicate Table 2 or other tables, you can:
+%   - generate separate .tex table files, and
+%   - include them with additional \input{...} commands and sections.
+
+\section{Data and Sample}
+
+The replication uses bimonthly futures data for 21 commodities, grouped into
+seven sectors (Energy, Meats, Metals, Grains, Oilseeds, Softs, and industrial
+materials), over the period March 1986 to December 2010. For each observation
+date, prices of up to four nearby maturities are used to construct log returns
+for Short Roll and Excess Holding strategies.
+
+\subsection{Short Roll and Excess Holding Returns}
+
+Let $F_t^{(n)}$ denote the futures price with maturity $n$ (in months) at time
+$t$, and let the bimonthly observation interval be $\Delta t$ (six periods per
+year).
+
+\paragraph{Short Roll (SR).}
+The Short Roll strategy continually rolls into contracts with fixed
+time-to-maturity $n$, rather than holding a single contract to maturity. The
+log Short Roll return from $t$ to $t+\Delta t$ for maturity $n$ is, at a high
+level,
+\[
+  r^{\text{SR},n}_{t\to t+\Delta t}
+    = \ln F_{t+\Delta t}^{(n)} - \ln F_t^{(n)}.
+\]
+In the implementation, these returns are computed at the commodity level and
+labelled $\texttt{sr\_1}, \dots, \texttt{sr\_4}$; sector-level SR indices are
+formed as equal-weighted averages across commodities in each sector.
+
+\paragraph{Excess Holding (EH).}
+Excess Holding returns compare a buy-and-hold strategy over $n$ bimonthly
+periods to the Short Roll strategy over the same horizon. Let
+$r^{\text{Hold},n}_{t\to t+n}$ be the log return from buying an $n$-maturity
+contract at $t$ and holding it until $t+n$. Then the Excess Holding return is
+\[
+  r^{\text{EH},n}_{t\to t+n}
+    = r^{\text{Hold},n}_{t\to t+n} - r^{\text{SR},n}_{t\to t+n}.
+\]
+These are stored as $\texttt{eh\_2}, \texttt{eh\_3}, \texttt{eh\_4}$ and
+aggregated to the sector level via equal-weighted averages.
+
+\subsection{Annualization and Newey--West $t$-statistics}
+
+All summary statistics are based on bimonthly log returns. There are six
+bimonthly periods per year. For a strategy with holding period
+$n_{\text{periods}}$ (in bimonthly units), the annualization factor is
+\[
+  \text{ann\_factor} = \frac{6}{n_{\text{periods}}}.
+\]
+Given the sample mean $\mu_{\text{raw}}$ and standard deviation
+$\sigma_{\text{raw}}$ of the bimonthly returns, the annualized mean and
+standard deviation are
+\[
+  \mu_{\text{ann}} = \mu_{\text{raw}} \times \text{ann\_factor}, \qquad
+  \sigma_{\text{ann}} = \sigma_{\text{raw}} \times \sqrt{\text{ann\_factor}}.
+\]
+Short Roll returns use $n_{\text{periods}} = 1$ for all maturities
+$n = 1,2,3,4$, while Excess Holding returns use
+$n_{\text{periods}} = n$ (e.g.\ $n_{\text{periods}} = 2$ for $\texttt{eh\_2}$).
+
+To account for autocorrelation and heteroskedasticity in the bimonthly series,
+$t$-statistics are computed using a Newey--West HAC estimator. For each return
+series $\{r_t\}_{t=1}^T$, we estimate
+\[
+  r_t = \alpha + \varepsilon_t,
+\]
+and report the Newey--West $t$-statistic
+\[
+  t_{\text{NW}} = \frac{\hat{\alpha}}{\text{SE}_{\text{NW}}(\hat{\alpha})},
+\]
+with a lag length chosen as the maximum of
+$n_{\text{periods}} - 1$ and a rule-of-thumb $\lfloor T^{1/3} \rfloor$.
+
+\section{Summary Statistics for SR and EH}
+
+Table~\ref{tab:table1_sr_eh} reports the annualized mean, standard deviation,
+and Newey--West $t$-statistics for Short Roll (Panel A) and Excess Holding
+(Panel B) returns across sectors, as well as for an equally-weighted index
+across all commodities.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Summary Statistics for Short Roll and Excess Holding Returns}
+  \label{tab:table1_sr_eh}
+  \footnotesize
+  %
+  % NOTE:
+  % Generate a table file (e.g. table1_sr_eh.tex) from Python and place it in
+  % the same directory as this .tex file, then input it here.
+  %
+  \input{table1_sr_eh.tex}
+\end{table}
+
+\section{Adding Further Results}
+
+This document is designed to be extensible. To add more content:
+
+\begin{itemize}
+  \item \textbf{Additional tables:}
+        Generate new LaTeX table files from Python
+        (e.g.\ \texttt{table2_basis_sorts.tex}) and include them with
+        \verb|\input{table2_basis_sorts.tex}| in new sections.
+  \item \textbf{Figures:}
+        Save plots from your code (e.g.\ PNG or PDF) into the
+        \texttt{reports/} or \texttt{output/} directory and include them with
+        \verb|\includegraphics|.
+        For example:
+\begin{verbatim}
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.7\textwidth]{basis_factor_plot.pdf}
+  \caption{Basis-sorted high-minus-low portfolio returns.}
+\end{figure}
+\end{verbatim}
+  \item \textbf{Discussion sections:}
+        Add new \verb|\section| or \verb|\subsection| blocks to interpret
+        differences between your replication and the published results, or to
+        document robustness checks.
+\end{itemize}
+
+% TODO:
+% - Add a section on Table 2 (basis sorts) once the replication is complete.
+% - Add plots of time series (e.g., EW_All SR_1 over time) as figures.
+
+\end{document}
