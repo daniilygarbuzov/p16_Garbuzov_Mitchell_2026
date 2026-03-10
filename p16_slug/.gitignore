@@ -1,14 +1,4 @@
 
-<<<<<<< HEAD
-##########################
-# Project Input and Output
-##########################
-
-# Exclude _data folder, since it should all be pulled automatically (unless in the manual folder)
-/_data/*
-
-=======
->>>>>>> 78ddf03ec1bd176dd908f4be26647081829fc04e
 # Exclude _output directory since it's should generated automatically
 /_output/*
 
@@ -20,10 +10,6 @@
 # Allow example environment file
 !.env.example*
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 78ddf03ec1bd176dd908f4be26647081829fc04e
 # Other
 temp*.csv
 */_build/
@@ -36,24 +22,6 @@ drafts/draft_bp.pdf
 
 # Sphinx build files
 _docs/
-<<<<<<< HEAD
-
-
-##############
-#Excluded PDFs
-##############
-# I've decided to exclude all PDFs unless they're in the literature or papers directory.
-# http://stackoverflow.com/questions/1248570/git-ignore-everything-except-subdirectory
-
-# !/related_literature/*
-# !/related_literature/
-# !/related_literature/*/*
-# !/Papers/*
-# !/papers/*
-# !/literature/*
-
-=======
->>>>>>> 78ddf03ec1bd176dd908f4be26647081829fc04e
 #########################
 # Exclude Compiled Files
 #########################
@@ -111,11 +79,7 @@ coverage.xml
 *.log
 
 # Sphinx documentation
-<<<<<<< HEAD
-docs/
-=======
 # docs/
->>>>>>> 78ddf03ec1bd176dd908f4be26647081829fc04e
 /docs_src/apidocs
 
 
@@ -263,7 +227,3 @@ src/z_scratch_project_template.ipynb
 *Thumbs.db
 
 src/z_scratch_pipeline_template.ipynb
-<<<<<<< HEAD
-=======
-*Interactive-*
->>>>>>> 78ddf03ec1bd176dd908f4be26647081829fc04e
