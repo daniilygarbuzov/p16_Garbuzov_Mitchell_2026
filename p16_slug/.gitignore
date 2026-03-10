@@ -1,0 +1,7 @@
+_data/
+_output/
+__pycache__/
+*.pyc
+.env
+.doit-db.sqlite
+.DS_Store
