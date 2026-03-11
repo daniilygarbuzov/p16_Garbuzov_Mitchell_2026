@@ -26,7 +26,7 @@ from settings import config
 DATA_DIR   = Path(config("DATA_DIR"))
 OUTPUT_DIR = Path(config("OUTPUT_DIR"))
 
-TOLERANCE = 0.03
+TOLERANCE = 0.02
 
 
 @pytest.fixture(scope="module")
