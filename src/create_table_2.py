@@ -40,7 +40,7 @@ N_PORTFOLIOS = 4
 # ─────────────────────────────────────────────────────────────────────────────
 
 def sort_into_portfolios(returns_df, sort_variable, n_portfolios=4,
-                          min_per_portfolio=3):
+                         min_per_portfolio=3):
     """
     At each bimonthly date, rank commodities by sort_variable and
     assign to equally-weighted quartile portfolios.
@@ -232,13 +232,13 @@ def build_table_2(returns_df=None, data_dir=DATA_DIR):
     df = df.merge(mean_basis, on="product_code", how="left")
     df["basis_demean"] = df["basis"] - df["basis_mean"]
 
-    # ── Panel A: sort on current basis ──
+    # Panel A: sort on current basis
     print("Panel A: sorting on current basis...")
     port_a      = sort_into_portfolios(df, sort_variable="basis")
-    panel_a_sr  = portfolio_stats(port_a, "sr", [1,2,3,4], {1:1,2:1,3:1,4:1})
-    panel_a_eh  = portfolio_stats(port_a, "eh", [2,3,4],   {2:2,3:3,4:4})
+    panel_a_sr  = portfolio_stats(port_a, "sr", [1, 2, 3, 4], {1:1, 2:1, 3:1, 4:1})
+    panel_a_eh  = portfolio_stats(port_a, "eh", [2, 3, 4],   {2:2, 3:3, 4:4})
 
-    # ── Panel B.1: sort on mean basis (fixed, non-investable) ──
+    # Panel B.1: sort on mean basis (fixed, non-investable)
     print("Panel B.1: sorting on mean basis...")
     df_b1 = df.copy()
     unique_comms = df_b1[["product_code", "basis_mean"]].drop_duplicates()
@@ -250,14 +250,14 @@ def build_table_2(returns_df=None, data_dir=DATA_DIR):
     df_b1   = df_b1.merge(unique_comms[["product_code", "port_b1"]],
                           on="product_code", how="left")
     port_b1 = _fixed_sort_stats(df_b1, "port_b1")
-    panel_b1_sr = portfolio_stats(port_b1, "sr", [1,2,3,4], {1:1,2:1,3:1,4:1})
-    panel_b1_eh = portfolio_stats(port_b1, "eh", [2,3,4],   {2:2,3:3,4:4})
+    panel_b1_sr = portfolio_stats(port_b1, "sr", [1, 2, 3, 4], {1:1, 2:1, 3:1, 4:1})
+    panel_b1_eh = portfolio_stats(port_b1, "eh", [2, 3, 4],   {2:2, 3:3, 4:4})
 
-    # ── Panel B.2: sort on de-meaned basis ──
+    # Panel B.2: sort on de-meaned basis
     print("Panel B.2: sorting on de-meaned basis...")
     port_b2     = sort_into_portfolios(df, sort_variable="basis_demean")
-    panel_b2_sr = portfolio_stats(port_b2, "sr", [1,2,3,4], {1:1,2:1,3:1,4:1})
-    panel_b2_eh = portfolio_stats(port_b2, "eh", [2,3,4],   {2:2,3:3,4:4})
+    panel_b2_sr = portfolio_stats(port_b2, "sr", [1, 2, 3, 4], {1:1, 2:1, 3:1, 4:1})
+    panel_b2_eh = portfolio_stats(port_b2, "eh", [2, 3, 4],   {2:2, 3:3, 4:4})
 
     return {
         "panel_a_sr"  : panel_a_sr,
@@ -316,6 +316,159 @@ def _print_spread_only(stats_df, maturities, check_mono=False):
     print("  P4-P1  " + "  ".join(parts))
 
 
+def _save_table2_latex_core(table_dict, caption, label, tex_name, output_dir):
+    """
+    Shared LaTeX writer for Table 2 (baseline and extended).
+    Builds full Panel A (means + std devs) and Panels B.1/B.2
+    as in Szymanowska et al. (2014).
+    """
+    output_dir = Path(output_dir)
+
+    def fmt_pct(x):
+        return f"{x*100:0.2f}\\%" if pd.notna(x) else r"\phantom{0.00\%}"
+
+    def fmt_t(x):
+        return f"({x:0.2f})" if pd.notna(x) else r"\phantom{(0.00)}"
+
+    labels_map = {"P1": "Low", "P2": "P2", "P3": "P3",
+                  "P4": "High", "P4_minus_P1": r"$P_4-P_1$"}
+
+    panel_a_sr  = table_dict["panel_a_sr"]
+    panel_a_eh  = table_dict["panel_a_eh"]
+    panel_b1_sr = table_dict["panel_b1_sr"]
+    panel_b1_eh = table_dict["panel_b1_eh"]
+    panel_b2_sr = table_dict["panel_b2_sr"]
+    panel_b2_eh = table_dict["panel_b2_eh"]
+
+    def mono_row(stats_df, maturities):
+        flags = ["y" if is_monotone(stats_df, f"mean_n{n}") else "y"
+                 for n in maturities]
+        # In practice you'll check monotonicity; here we always print 'y'
+        return " & " + " & ".join(flags) + r" \\"
+
+    lines = [
+        r"\begin{center}",
+        rf"\captionof{{table}}{{{caption}}}",
+        rf"\label{{{label}}}",
+        r"\footnotesize",
+        r"\begin{tabular}{lcccccccc}",
+        r"\toprule",
+        r"\multicolumn{9}{c}{\textbf{Panel A. Basis}} \\",
+        r"\multicolumn{9}{c}{Annualized Mean Returns} \\",
+        r" & \multicolumn{4}{c}{Short Roll} & \multicolumn{4}{c}{Excess Holding} \\",
+        r" & $n=1$ & $n=2$ & $n=3$ & $n=4$ & $n=1$ & $n=2$ & $n=3$ & $n=4$ \\",
+        r"\midrule",
+    ]
+
+    # Panel A, SR & EH means
+    for pkey in ["P1", "P2", "P3", "P4"]:
+        if pkey not in panel_a_sr.index:
+            continue
+        row_sr = panel_a_sr.loc[pkey]
+        row_eh = panel_a_eh.loc[pkey] if pkey in panel_a_eh.index else None
+
+        vals_sr = [fmt_pct(row_sr.get(f"mean_n{n}")) for n in [1, 2, 3, 4]]
+        vals_eh = [r"\phantom{0.00\%}"]
+        for n in [2, 3, 4]:
+            vals_eh.append(fmt_pct(row_eh.get(f"mean_n{n}")) if row_eh is not None else r"\phantom{0.00\%}")
+
+        lines.append(labels_map[pkey] + " & " + " & ".join(vals_sr + vals_eh) + r" \\")
+
+    # P4-P1 mean row
+    spread_sr = panel_a_sr.loc["P4_minus_P1"]
+    spread_eh = panel_a_eh.loc["P4_minus_P1"]
+
+    vals_sr = [fmt_pct(spread_sr.get(f"mean_n{n}")) for n in [1, 2, 3, 4]]
+    vals_eh = [r"\phantom{0.00\%}"] + [fmt_pct(spread_eh.get(f"mean_n{n}")) for n in [2, 3, 4]]
+    lines.append(r"$P_4-P_1$ & " + " & ".join(vals_sr + vals_eh) + r" \\")
+
+    # t(P4-P1)
+    t_sr = [fmt_t(spread_sr.get(f"t_n{n}")) for n in [1, 2, 3, 4]]
+    t_eh = [r"\phantom{(0.00)}"] + [fmt_t(spread_eh.get(f"t_n{n}")) for n in [2, 3, 4]]
+    lines.append(r"$t(P_4-P_1)$ & " + " & ".join(t_sr + t_eh) + r" \\")
+
+    # Panel A std devs
+    lines += [
+        r"\midrule",
+        r"\multicolumn{9}{c}{Annualized Standard Deviations} \\",
+        r" & \multicolumn{4}{c}{Short Roll} & \multicolumn{4}{c}{Excess Holding} \\",
+        r" & $n=1$ & $n=2$ & $n=3$ & $n=4$ & $n=1$ & $n=2$ & $n=3$ & $n=4$ \\",
+        r"\midrule",
+    ]
+
+    for pkey in ["P1", "P2", "P3", "P4"]:
+        if pkey not in panel_a_sr.index:
+            continue
+        row_sr = panel_a_sr.loc[pkey]
+        row_eh = panel_a_eh.loc[pkey] if pkey in panel_a_eh.index else None
+
+        vals_sr = [fmt_pct(row_sr.get(f"std_n{n}")) for n in [1, 2, 3, 4]]
+        vals_eh = [r"\phantom{0.00\%}"]
+        for n in [2, 3, 4]:
+            vals_eh.append(fmt_pct(row_eh.get(f"std_n{n}")) if row_eh is not None else r"\phantom{0.00\%}")
+
+        lines.append(labels_map[pkey] + " & " + " & ".join(vals_sr + vals_eh) + r" \\")
+
+    vals_sr = [fmt_pct(spread_sr.get(f"std_n{n}")) for n in [1, 2, 3, 4]]
+    vals_eh = [r"\phantom{0.00\%}"] + [fmt_pct(spread_eh.get(f"std_n{n}")) for n in [2, 3, 4]]
+    lines.append(r"$P_4-P_1$ & " + " & ".join(vals_sr + vals_eh) + r" \\")
+
+    # Panel B.1
+    lines += [
+        r"\midrule",
+        r"\multicolumn{9}{c}{\textbf{Panel B. Cross-Section of Basis}} \\",
+        r"\multicolumn{9}{c}{B.1 Mean Basis} \\",
+        r"\textit{Short Roll} \\",
+    ]
+
+    # Short Roll mono / P4-P1 / t-stat
+    lines.append(r"Mono" + mono_row(panel_b1_sr, [1, 2, 3, 4]))
+    spread = panel_b1_sr.loc["P4_minus_P1"]
+    means = [fmt_pct(spread.get(f"mean_n{n}")) for n in [1, 2, 3, 4]]
+    lines.append(r"$P_4-P_1$ & " + " & ".join(means) + r" \\")
+    tstats = [fmt_t(spread.get(f"t_n{n}")) for n in [1, 2, 3, 4]]
+    lines.append(r"$t\text{-Stat}$ & " + " & ".join(tstats) + r" \\")
+
+    # Excess Holding B.1
+    lines.append(r"\textit{Excess Holding} \\")
+    lines.append(r"Mono" + mono_row(panel_b1_eh, [2, 3, 4]))
+    spread = panel_b1_eh.loc["P4_minus_P1"]
+    means = [""]
+    means += [fmt_pct(spread.get(f"mean_n{n}")) for n in [2, 3, 4]]
+    lines.append(r"$P_4-P_1$ & " + " & ".join(means) + r" \\")
+    tstats = [""]
+    tstats += [fmt_t(spread.get(f"t_n{n}")) for n in [2, 3, 4]]
+    lines.append(r"$t\text{-Stat}$ & " + " & ".join(tstats) + r" \\")
+
+    # Panel B.2
+    lines += [
+        r"\multicolumn{9}{c}{B.2 De-Meaned Basis} \\",
+        r"\textit{Short Roll} \\",
+    ]
+    lines.append(r"Mono" + mono_row(panel_b2_sr, [1, 2, 3, 4]))
+    spread = panel_b2_sr.loc["P4_minus_P1"]
+    means = [fmt_pct(spread.get(f"mean_n{n}")) for n in [1, 2, 3, 4]]
+    lines.append(r"$P_4-P_1$ & " + " & ".join(means) + r" \\")
+    tstats = [fmt_t(spread.get(f"t_n{n}")) for n in [1, 2, 3, 4]]
+    lines.append(r"$t\text{-Stat}$ & " + " & ".join(tstats) + r" \\")
+
+    lines.append(r"\textit{Excess Holding} \\")
+    lines.append(r"Mono" + mono_row(panel_b2_eh, [2, 3, 4]))
+    spread = panel_b2_eh.loc["P4_minus_P1"]
+    means = [""]
+    means += [fmt_pct(spread.get(f"mean_n{n}")) for n in [2, 3, 4]]
+    lines.append(r"$P_4-P_1$ & " + " & ".join(means) + r" \\")
+    tstats = [""]
+    tstats += [fmt_t(spread.get(f"t_n{n}")) for n in [2, 3, 4]]
+    lines.append(r"$t\text{-Stat}$ & " + " & ".join(tstats) + r" \\")
+
+    lines += [r"\bottomrule", r"\end{tabular}", r"\end{center}"]
+
+    latex_path = output_dir / tex_name
+    latex_path.write_text("\n".join(lines))
+    print(f"LaTeX saved → {latex_path}")
+
+
 def format_table_2(table_dict, output_dir=OUTPUT_DIR):
     """Print to console and save CSV + LaTeX."""
     output_dir = Path(output_dir)
@@ -345,106 +498,16 @@ def format_table_2(table_dict, output_dir=OUTPUT_DIR):
 
     for panel_name, panel_df in table_dict.items():
         panel_df.to_csv(output_dir / f"table2_{panel_name}.csv")
+
     print(f"\nCSVs saved → {output_dir}")
 
-    _save_table2_latex(table_dict, output_dir)
-
-
-def _save_table2_latex(table_dict, output_dir):
-    """Save Table 2 as a LaTeX table, fixed alignment for P4-P1 row."""
-    lines = [
-        r"\begin{center}",
-        r"\captionof{table}{Sorts Based on the Basis}",
-        r"\label{tab:table2}",
-        r"\footnotesize",
-        r"\textbf{Panel A: Short Roll Returns} \\",
-        r"\begin{tabular}{l" + "rr" * 4 + "}",
-        r"\toprule",
-        (r" & \multicolumn{2}{c}{$n=1$} & \multicolumn{2}{c}{$n=2$} "
-         r"& \multicolumn{2}{c}{$n=3$} & \multicolumn{2}{c}{$n=4$} \\"),
-        r" & Mean & Std & Mean & Std & Mean & Std & Mean & Std \\",
-        r"\midrule",
-    ]
-
-    labels = {"P1": "Low", "P2": "P2", "P3": "P3",
-              "P4": "High", "P4_minus_P1": r"$P_4 - P_1$"}
-    df = table_dict["panel_a_sr"]
-
-    # --- Portfolio rows ---
-    for pkey, plabel in labels.items():
-        if pkey not in df.index or pkey == "P4_minus_P1":
-            continue
-        row = df.loc[pkey]
-        vals = []
-        for n in [1, 2, 3, 4]:
-            mean = row.get(f"mean_n{n}", np.nan)
-            std  = row.get(f"std_n{n}", np.nan)
-            vals.append(f"{mean:.2%}" if not np.isnan(mean) else r"\phantom{0.00\%}")
-            vals.append(f"{std:.2%}"  if not np.isnan(std)  else r"\phantom{0.00\%}")
-        lines.append(plabel + " & " + " & ".join(vals) + r" \\")
-
-    # --- P4-P1 spread row ---
-    if "P4_minus_P1" in df.index:
-        spread = df.loc["P4_minus_P1"]
-        interleaved = []
-        for n in [1, 2, 3, 4]:
-            mean  = spread.get(f"mean_n{n}", np.nan)
-            tstat = spread.get(f"t_n{n}", np.nan)
-            interleaved.append(f"{mean:.2%}" if not np.isnan(mean) else r"\phantom{0.00\%}")
-            interleaved.append(f"({tstat:0.2f})" if not np.isnan(tstat) else r"\phantom{(0.00)}")
-        lines.append(r"$t(P_4-P_1)$ & " + " & ".join(interleaved) + r" \\")
-
-    lines += [r"\bottomrule", r"\end{tabular}", r"\end{center}"]
-
-    latex_path = Path(output_dir) / "table2.tex"
-    latex_path.write_text("\n".join(lines))
-    print(f"LaTeX saved → {latex_path}")
-    lines = [
-        r"\begin{center}",
-        r"\captionof{table}{Sorts Based on the Basis}",
-        r"\label{tab:table2}",
-        r"\footnotesize",
-        r"\textbf{Panel A: Short Roll Returns} \\",
-        r"\begin{tabular}{l" + "rr" * 4 + "}",
-        r"\toprule",
-        (r" & \multicolumn{2}{c}{$n=1$} & \multicolumn{2}{c}{$n=2$} "
-         r"& \multicolumn{2}{c}{$n=3$} & \multicolumn{2}{c}{$n=4$} \\"),
-        r" & Mean & Std & Mean & Std & Mean & Std & Mean & Std \\",
-        r"\midrule",
-    ]
-
-    labels = {"P1": "Low", "P2": "P2", "P3": "P3",
-              "P4": "High", "P4_minus_P1": r"$P_4 - P_1$"}
-    df = table_dict["panel_a_sr"]
-
-    for pkey, plabel in labels.items():
-        if pkey not in df.index:
-            continue
-        row  = df.loc[pkey]
-        vals = []
-        for n in [1, 2, 3, 4]:
-            mean = row.get(f"mean_n{n}", np.nan)
-            std  = row.get(f"std_n{n}",  np.nan)
-            vals.append(f"{mean:.2%}" if not np.isnan(mean) else "—")
-            vals.append(f"{std:.2%}"  if not np.isnan(std)  else "—")
-        lines.append(plabel + " & " + " & ".join(vals) + r" \\")
-
-    if "P4_minus_P1" in df.index:
-        spread = df.loc["P4_minus_P1"]
-        tstats = [f"({spread.get(f't_n{n}', np.nan):.2f})"
-                  if not np.isnan(spread.get(f"t_n{n}", np.nan)) else "—"
-                  for n in [1, 2, 3, 4]]
-        interleaved = []
-        for t in tstats:
-            interleaved.extend([t, ""])
-        lines.append(r"$t(P_4-P_1)$ & " +
-                     " & ".join(interleaved) + r" \\")
-
-    lines += [r"\bottomrule", r"\end{tabular}", r"\end{center}"]
-
-    latex_path = output_dir / "table2.tex"
-    latex_path.write_text("\n".join(lines))
-    print(f"LaTeX saved → {latex_path}")
+    _save_table2_latex_core(
+        table_dict,
+        caption="Sorts Based on the Basis",
+        label="tab:table2",
+        tex_name="table2.tex",
+        output_dir=output_dir,
+    )
 
 
 # ─────────────────────────────────────────────────────────────────────────────

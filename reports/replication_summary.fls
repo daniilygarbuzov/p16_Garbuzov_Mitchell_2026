@@ -91,4 +91,10 @@ INPUT ../_output/summary_stats.tex
 INPUT ../_output/fig_sr_sector_bar.png
 INPUT ../_output/fig_sr_sector_bar.png
 INPUT ../_output/fig_sr_sector_bar.png
+INPUT ../_output/table2.tex
+INPUT ../_output/table2.tex
+INPUT ../_output/table2.tex
+INPUT ../_output/table2_extended.tex
+INPUT ../_output/table2_extended.tex
+INPUT ../_output/table2_extended.tex
 INPUT replication_summary.aux

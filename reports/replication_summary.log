@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999997 (TeX Live 2025) (preloaded format=xelatex 2025.3.8)  10 MAR 2026 20:40
+This is XeTeX, Version 3.141592653-2.6-0.999997 (TeX Live 2025) (preloaded format=xelatex 2025.3.8)  10 MAR 2026 23:33
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -265,21 +265,27 @@ File: ../_output/fig_sr_sector_bar.png Graphic file (type bmp)
 <../_output/fig_sr_sector_bar.png>
 
 
-[4]
+[4] (../_output/table2.tex
 
-[5] (./replication_summary.aux)
+[5])
+
+[6] (../_output/table2_extended.tex)
+
+[7
+
+] (./replication_summary.aux)
  ***********
 LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2025-01-18>
  ***********
  ) 
 Here is how much of TeX's memory you used:
- 3721 strings out of 473832
- 63340 string characters out of 5729482
+ 3744 strings out of 473832
+ 63946 string characters out of 5729482
  474734 words of memory out of 5000000
- 26766 multiletter control sequences out of 15000+600000
- 564815 words of font info for 65 fonts, out of 8000000 for 9000
+ 26777 multiletter control sequences out of 15000+600000
+ 564839 words of font info for 68 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
- 57i,7n,65p,446b,317s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 57i,10n,65p,446b,317s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on replication_summary.xdv (5 pages, 91848 bytes).
+Output written on replication_summary.xdv (7 pages, 121984 bytes).
