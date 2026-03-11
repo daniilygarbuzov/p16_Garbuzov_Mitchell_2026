@@ -31,6 +31,9 @@
 \section{Data Construction and Descriptives}
 
 In this paper, we replicate Tables I and II from Szymanowska et al. (2014), which deconstruct the spot and term premia for various commodity sectors.
+The data is analyzed from March 1986 to December 2010, and is sourced from the Wharton Research Data Services (WRDS) database. 
+Succeses in this project were a better understanding of commodities premia, deployment of ideas learned from class such as juypter notebooks and cruft, and succesfully building a github repo from start to finish!
+Challenges in this project were replication of the paper, creating tables within a Latex document, and finding commodities futures contracts information.
 
 \subsection{Commodity Panel Sample (Head)}
 
@@ -122,5 +125,18 @@ The mean basis indicates to us whether a sector is on average in backwardation o
 while meats and grains are predominantly in contango. Note the std, minimum and maximum basis values as well, which indicate a high level of volatility in many commodities. Skew and kurtosis further help us understand the general shape of these returns.
 
 \input{../_output/summary_stats.tex}
+
+\section{Sector-Level Short Roll Premia}
+
+This chart shows annualized Short Roll mean returns
+by sector and maturity, using the sector rows from Table~1. Similair to the summary statistics above, SR premia indicate whether a sector is on average in backwardation or contango. We've graphed spot premia for maturities \(n=1,2,3,4\) to show how the premia evolve as we move further out along the futures curve.
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.8\textwidth]{../_output/fig_sr_sector_bar.png}
+  \caption{Sector-level Short Roll (SR) annualized mean returns by
+  maturity $n=1,2,3,4$.}
+  \label{fig:sr_sector_bar}
+\end{figure}
+
 
 \end{document}

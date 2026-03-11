@@ -223,8 +223,3 @@ display(t2_ext)
 t2_ext_path = OUTPUT_DIR / "table2_extended_all_panels.csv"
 t2_ext.to_csv(t2_ext_path, index=False)
 t2_ext_path
-
-# %% [markdown]
-# ### 4.1 Extended Sample Table 2
-#
-# Note that this table is generated using values up until the present

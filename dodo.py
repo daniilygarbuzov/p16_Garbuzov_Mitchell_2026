@@ -308,6 +308,22 @@ def task_make_summary_stats():
         "clean": True,
     }
 
+def task_plot_sr_sector_bar():
+    """Generate sector-level SR mean returns bar chart."""
+    return {
+        "actions": [
+            "python src/create_chart_SR_latex.py",
+        ],
+        "file_dep": [
+            OUTPUT_DIR / "table1_short_roll.csv",
+            "src/create_chart_SR_latex.py",
+        ],
+        "targets": [
+            OUTPUT_DIR / "fig_sr_sector_bar.png",
+        ],
+        "clean": True,
+    }
+
 def task_compile_latex_docs():
     """Compile replication_summary.tex to PDF."""
     return {
